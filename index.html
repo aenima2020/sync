@@ -845,7 +845,15 @@ input, button, textarea {
         <input class="inp" id="secretFirebase" placeholder="Database secret / auth token" type="password" style="font-size:.74rem;">
       </div>
       <div class="setup-st" id="stFirebase"></div>
-      <button class="btn btn-outline" onclick="testFirebase()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Firebase</button>
+      <button class="btn btn-outline" onclick="testFirebase()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Firebase The Sims 4</button>
+    </div>
+
+    <!-- Game Store Firebase Section -->
+    <div class="setup-section">
+      <div class="form-label">Game Store — Firebase RTDB URL (Katalog Cepat)</div>
+      <input class="inp" id="urlStoreFirebase" placeholder="https://store-...firebasedatabase.app" style="font-size:.74rem;">
+      <div class="setup-st" id="stStoreFirebase"></div>
+      <button class="btn btn-outline" onclick="testStoreFirebase()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Firebase Game Store</button>
     </div>
 
     <!-- Apps Script Section (Store & General) -->
@@ -1025,6 +1033,7 @@ input, button, textarea {
       <span>GAME STORE</span>
       <span class="hdr-badge">Sims 4 ›</span>
     </div>
+    <button class="hdr-btn" id="gBtnSyncFb" onclick="gSyncFirebase()" title="Sync HF & Sheets ke Firebase" style="color:var(--teal);border-color:rgba(30,200,200,0.35);font-size:.7rem;padding:0 9px;width:auto;display:inline-flex;align-items:center;gap:4px;">🔄 Sync FB</button>
     <button class="hdr-btn" onclick="gRefresh()" title="Refresh Katalog">↻</button>
     <button class="hdr-btn" onclick="enterMode('sims')" title="Pindah ke The Sims 4">🏠</button>
   </div>
@@ -1044,7 +1053,10 @@ input, button, textarea {
         <button class="search-clear" id="gSearchClear" onclick="clearSearch('gSearch','gSearchClear',gRenderGames)" title="Clear Search">✕</button>
       </div>
     </div>
-    <div class="stats" id="gStats">Memuat katalog game...</div>
+    <div class="stats" id="gStats" style="display:flex;align-items:center;justify-content:space-between;">
+      <span id="gStatsText">Memuat katalog game...</span>
+      <button class="btn-act" onclick="gSyncFirebase()" style="background:var(--teal-dim);color:var(--teal);border:1px solid rgba(30,200,200,0.3);padding:3px 8px;font-size:.62rem;">🔄 Sync Firebase</button>
+    </div>
     <div class="tab-scroll" id="gGameList"><div class="empty">Memuat katalog...</div></div>
   </div>
 
@@ -1127,11 +1139,13 @@ input, button, textarea {
 <script>
 // Default URLs
 const DEFAULT_FIREBASE_URL = 'https://wgsims-ffdea-default-rtdb.asia-southeast1.firebasedatabase.app';
+const DEFAULT_STORE_FIREBASE_URL = 'https://store-54298-default-rtdb.asia-southeast1.firebasedatabase.app';
 const DEFAULT_PIN = '190619';
 
 // Storage State
 let FIREBASE_URL = localStorage.getItem('wg_sims_firebase') || DEFAULT_FIREBASE_URL;
 let FIREBASE_SECRET = localStorage.getItem('wg_sims_fb_secret') || '';
+let STORE_FIREBASE_URL = localStorage.getItem('wg_store_firebase') || DEFAULT_STORE_FIREBASE_URL;
 let STORE_API = localStorage.getItem('wg_store_api') || '';
 let SIMS_API = localStorage.getItem('wg_sims_api') || '';
 
@@ -1158,6 +1172,7 @@ let _gRvData = [];
 (function initApp() {
   // Normalize Firebase URL trailing slash
   if (FIREBASE_URL.endsWith('/')) FIREBASE_URL = FIREBASE_URL.slice(0, -1);
+  if (STORE_FIREBASE_URL.endsWith('/')) STORE_FIREBASE_URL = STORE_FIREBASE_URL.slice(0, -1);
 
   if (!FIREBASE_URL && !STORE_API) {
     show('scrSetup');
@@ -1221,6 +1236,7 @@ function clearSearch(inputId, clearBtnId, callback) {
 function showSetup() {
   document.getElementById('urlFirebase').value = FIREBASE_URL;
   document.getElementById('secretFirebase').value = FIREBASE_SECRET;
+  document.getElementById('urlStoreFirebase').value = STORE_FIREBASE_URL;
   document.getElementById('urlStore').value = STORE_API;
   document.getElementById('urlSims').value = SIMS_API;
   show('scrSetup');
@@ -1229,27 +1245,60 @@ function showSetup() {
 function saveSetup() {
   let fb = document.getElementById('urlFirebase').value.trim();
   const fbs = document.getElementById('secretFirebase').value.trim();
+  let sfb = document.getElementById('urlStoreFirebase').value.trim();
   const st = document.getElementById('urlStore').value.trim();
   const sa = document.getElementById('urlSims').value.trim();
 
   if (fb.endsWith('/')) fb = fb.slice(0, -1);
-  if (!fb && !st && !sa) {
+  if (sfb.endsWith('/')) sfb = sfb.slice(0, -1);
+  if (!fb && !sfb && !st && !sa) {
     toast('Isi minimal satu endpoint server', 1);
     return;
   }
 
   FIREBASE_URL = fb || DEFAULT_FIREBASE_URL;
   FIREBASE_SECRET = fbs;
+  STORE_FIREBASE_URL = sfb || DEFAULT_STORE_FIREBASE_URL;
   STORE_API = st;
   SIMS_API = sa;
 
   localStorage.setItem('wg_sims_firebase', FIREBASE_URL);
   localStorage.setItem('wg_sims_fb_secret', FIREBASE_SECRET);
+  localStorage.setItem('wg_store_firebase', STORE_FIREBASE_URL);
   localStorage.setItem('wg_store_api', STORE_API);
   localStorage.setItem('wg_sims_api', SIMS_API);
 
   toast('Konfigurasi server tersimpan!', 0);
   setTimeout(() => show('scrMode'), 400);
+}
+
+async function testStoreFirebase() {
+  const st = document.getElementById('stStoreFirebase');
+  let u = document.getElementById('urlStoreFirebase').value.trim();
+  if (u.endsWith('/')) u = u.slice(0, -1);
+  if (!u) {
+    st.className = 'setup-st err';
+    st.textContent = 'URL Firebase Game Store kosong';
+    return;
+  }
+
+  st.className = 'setup-st wait';
+  st.textContent = 'Mengecek koneksi Firebase Game Store...';
+
+  try {
+    const res = await fetch(u + '/sync_status.json', { method: 'GET' });
+    if (res.status === 200) {
+      const data = await res.json();
+      st.className = 'setup-st ok';
+      st.textContent = '✅ Terhubung! Database Game Store aktif' + (data && data.total_games ? ' (' + data.total_games + ' game tersinkron)' : '');
+    } else {
+      st.className = 'setup-st ok';
+      st.textContent = '✅ Terhubung! HTTP ' + res.status;
+    }
+  } catch (err) {
+    st.className = 'setup-st err';
+    st.textContent = 'Gagal: ' + err.message;
+  }
 }
 
 async function testFirebase() {
@@ -2021,22 +2070,78 @@ async function apiStoreGet(params) {
   return await res.json();
 }
 
-// ── Refresh Games Catalog ──
+// ── Refresh Games Catalog (Direct Firebase RTDB with Apps Script Fallback) ──
 async function gRefresh() {
-  if (!STORE_API) return;
-  const stats = document.getElementById('gStats');
-  stats.textContent = 'Mengambil katalog game...';
+  const statsText = document.getElementById('gStatsText') || document.getElementById('gStats');
+  if (statsText) statsText.textContent = 'Memuat katalog game...';
+
+  // 1. Coba baca langsung dari Firebase Realtime Database (Super Cepat ~100ms)
+  try {
+    const fbBase = (STORE_FIREBASE_URL || DEFAULT_STORE_FIREBASE_URL).replace(/\/+$/, '');
+    const res = await fetch(fbBase + '/game_catalog.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        _gGames = data;
+        gRenderGames();
+        if (statsText) statsText.textContent = _gGames.length + ' game aktif (Firebase RTDB)';
+        return;
+      }
+    }
+  } catch (fbErr) {
+    console.warn('Firebase direct fetch notice:', fbErr);
+  }
+
+  // 2. Fallback ke Google Apps Script jika Firebase belum pernah disinkronkan
+  if (!STORE_API) {
+    if (statsText) statsText.textContent = 'Katalog Firebase kosong & URL Apps Script belum diset';
+    return;
+  }
 
   try {
     const d = await apiStoreGet({ action: 'games' });
     if (d.status === 'ok') {
       _gGames = d.data || [];
       gRenderGames();
+      if (statsText) statsText.textContent = _gGames.length + ' game dimuat';
     } else {
-      stats.textContent = d.message || 'Error katalog';
+      if (statsText) statsText.textContent = d.message || 'Error katalog';
     }
   } catch (err) {
-    stats.textContent = 'Gagal: ' + err.message;
+    if (statsText) statsText.textContent = 'Gagal: ' + err.message;
+  }
+}
+
+// ── Sync Data HF & Sheets ke Firebase Realtime Database ──
+async function gSyncFirebase() {
+  if (!confirm('Sinkronkan data Game Store (Metadata Hugging Face & Link Google Sheets) ke Firebase Realtime Database sekarang?\nIni akan membuat katalog game terbuka secara instan di semua perangkat.')) return;
+  toast('Sedang sinkronisasi ke Firebase...', 0);
+  const btn = document.getElementById('gBtnSyncFb');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin" style="width:11px;height:11px;"></div> Syncing...';
+  }
+
+  try {
+    const d = await apiStorePost({ action: 'sync_firebase' });
+    if (d.status === 'ok') {
+      toast('✅ ' + (d.message || 'Berhasil disinkronkan ke Firebase!'), 0);
+      if (d.catalog && Array.isArray(d.catalog)) {
+        _gGames = d.catalog;
+        gRenderGames();
+      } else {
+        await gRefresh();
+      }
+    } else {
+      toast('Gagal: ' + (d.message || 'Error sync'), 1);
+    }
+  } catch(err) {
+    toast('Gagal sync: ' + err.message, 1);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '🔄 Sync FB';
+    }
   }
 }
 
@@ -2050,7 +2155,8 @@ function gRenderGames() {
   const q = (document.getElementById('gSearch').value || '').toLowerCase().trim();
   const f = _gGames.filter(g => !q || g.name.toLowerCase().includes(q) || (g.genre && g.genre.toLowerCase().includes(q)));
 
-  document.getElementById('gStats').textContent = f.length + ' dari ' + _gGames.length + ' game';
+  const statsText = document.getElementById('gStatsText') || document.getElementById('gStats');
+  if (statsText) statsText.textContent = f.length + ' dari ' + _gGames.length + ' game';
   const w = document.getElementById('gGameList');
   if (!f.length) {
     w.innerHTML = '<div class="empty">Game tidak ditemukan</div>';
