@@ -861,7 +861,11 @@ input, button, textarea {
       <div class="form-label">Game Store & Main Apps Script URL</div>
       <input class="inp" id="urlStore" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:.74rem;">
       <div class="setup-st" id="stStore"></div>
-      <button class="btn btn-outline" onclick="testStore()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Apps Script Game Store</button>
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <button class="btn btn-outline" onclick="testStore()" style="flex:1;padding:10px;font-size:.72rem;">Tes Koneksi Script</button>
+        <button class="btn btn-outline" onclick="testBotDrive()" id="btnTestBot" style="flex:1;padding:10px;font-size:.72rem;color:var(--teal);border-color:rgba(30,200,200,0.3);">🤖 Tes Bot Drive</button>
+      </div>
+      <div class="setup-st" id="stBotDrive"></div>
     </div>
 
     <!-- Sims 4 Email Apps Script (Optional) -->
@@ -1359,6 +1363,39 @@ async function testStore() {
   } catch (err) {
     st.className = 'setup-st err';
     st.textContent = 'Gagal konek: ' + err.message;
+  }
+}
+
+async function testBotDrive() {
+  const st = document.getElementById('stBotDrive');
+  const btn = document.getElementById('btnTestBot');
+  const u = document.getElementById('urlStore').value.trim() || STORE_API;
+  if (!u) {
+    st.className = 'setup-st err';
+    st.textContent = 'URL Apps Script Game Store kosong';
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  st.className = 'setup-st wait';
+  st.textContent = 'Mengecek status Bot Workspace Drive...';
+
+  try {
+    const q = new URLSearchParams({ action: 'test_bot', pin: _cachedPin || DEFAULT_PIN }).toString();
+    const res = await fetch(u + '?' + q, { redirect: 'follow' });
+    const d = await res.json();
+    if (d.status === 'ok') {
+      st.className = 'setup-st ok';
+      st.textContent = '✅ ' + (d.message || 'Bot Google Drive Aktif!') + ' (' + (d.impersonated || 'orchid@wgaming.my.id') + ')';
+    } else {
+      st.className = 'setup-st err';
+      st.textContent = '❌ ' + (d.message || 'Bot error');
+    }
+  } catch (err) {
+    st.className = 'setup-st err';
+    st.textContent = 'Gagal tes bot: ' + err.message;
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
