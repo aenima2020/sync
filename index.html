@@ -6,33 +6,37 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WG Admin">
-<meta name="theme-color" content="#07070f">
+<meta name="theme-color" content="#09090b">
 <title>Waroeng Game Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..1000;1,9..40,400..1000&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #07070f;
-  --sf: #100f20;
-  --card: #16152b;
-  --card2: #1e1c3a;
-  --card-hover: #262447;
-  --bd: #28264d;
-  --bd-focus: #1ec8c8;
-  --teal: #1ec8c8;
-  --teal-dim: rgba(30, 200, 200, 0.12);
-  --purple: #8b5cf6;
-  --purple-dim: rgba(139, 92, 246, 0.14);
-  --gold: #ffb800;
-  --gold-dim: rgba(255, 184, 0, 0.14);
-  --red: #ff4560;
-  --red-dim: rgba(255, 69, 96, 0.14);
-  --green: #00e676;
-  --green-dim: rgba(0, 230, 118, 0.14);
-  --text: #f0edf9;
-  --sub: #76749b;
-  --r: 16px;
+  --bg: #09090b;
+  --sf: #111115;
+  --sf-hover: #18181f;
+  --card: #141419;
+  --card-hover: #1b1b22;
+  --card-active: #20202a;
+  --card2: #181820;
+  --bd: rgba(255, 255, 255, 0.08);
+  --bd-subtle: rgba(255, 255, 255, 0.05);
+  --bd-focus: rgba(255, 255, 255, 0.28);
+  --text: #f4f4f7;
+  --sub: #828294;
+  --muted: #555566;
+  --pill-bg: rgba(255, 255, 255, 0.04);
+  --pill-bd: rgba(255, 255, 255, 0.08);
+  --danger: #ef4444;
+  --danger-dim: rgba(239, 68, 68, 0.08);
+  --danger-bd: rgba(239, 68, 68, 0.22);
+  --success: #10b981;
+  --success-dim: rgba(16, 185, 129, 0.08);
+  --success-bd: rgba(16, 185, 129, 0.22);
+  --r: 14px;
+  --r-sm: 10px;
+  --r-lg: 18px;
   --safe-top: max(14px, env(safe-area-inset-top));
   --safe-bottom: max(16px, env(safe-area-inset-bottom));
 }
@@ -53,14 +57,32 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "DM Sans", system-ui, sans-serif;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
 }
 
-input, button, textarea {
+input, button, textarea, select {
   user-select: auto;
   -webkit-user-select: auto;
 }
 
 ::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Minimalist Vector Icon System ── */
+.ico {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.ico-sm { width: 14px; height: 14px; stroke-width: 1.8; }
+.ico-lg { width: 20px; height: 20px; stroke-width: 1.7; }
+.ico-xl { width: 28px; height: 28px; stroke-width: 1.6; }
 
 .scr {
   display: none;
@@ -74,9 +96,9 @@ input, button, textarea {
 
 /* ── iOS Header ── */
 .app-hdr {
-  padding: 12px 18px;
+  padding: 12px 16px;
   padding-top: var(--safe-top);
-  background: rgba(16, 15, 32, 0.88);
+  background: rgba(12, 12, 16, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--bd);
@@ -87,86 +109,97 @@ input, button, textarea {
   z-index: 20;
 }
 .hdr-t {
-  font-size: 0.85rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
 }
 .hdr-badge {
-  font-size: 0.58rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--teal-dim);
-  color: var(--teal);
-  border: 1px solid rgba(30,200,200,0.25);
-  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--pill-bg);
+  color: var(--sub);
+  border: 1px solid var(--pill-bd);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .hdr-btn {
-  background: var(--card);
-  border: 1px solid var(--bd);
-  color: var(--text);
-  width: 34px;
-  height: 34px;
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-bd);
+  color: var(--sub);
+  width: 36px;
+  height: 36px;
   cursor: pointer;
-  font-size: 0.95rem;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.12s, border-color 0.15s;
+  transition: all 0.15s ease;
 }
 .hdr-btn:active {
-  transform: scale(0.92);
-  border-color: var(--teal);
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
-/* ── iOS Tab Bar ── */
+/* ── Minimalist Tab Bar ── */
 .tab-bar {
   display: flex;
-  background: rgba(16, 15, 32, 0.95);
+  background: rgba(14, 14, 18, 0.95);
   border-bottom: 1px solid var(--bd);
   flex-shrink: 0;
   overflow-x: auto;
+  padding: 4px 8px;
+  gap: 4px;
 }
 .tab-btn {
   flex: 1;
-  padding: 12px 6px;
+  padding: 9px 8px;
   text-align: center;
-  font-size: 0.68rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--sub);
   background: none;
   border: none;
-  border-bottom: 2.5px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   position: relative;
-  transition: color 0.15s, border-color 0.15s;
+  transition: all 0.15s ease;
+}
+.tab-btn:active {
+  transform: scale(0.97);
 }
 .tab-btn.active {
-  color: var(--teal);
-  border-bottom-color: var(--teal);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
 }
 .cart-badge {
-  position: absolute;
-  top: 4px;
-  right: 8px;
-  background: var(--red);
-  color: #fff;
-  font-size: 0.48rem;
-  font-weight: 900;
-  min-width: 15px;
-  height: 15px;
+  background: #f4f4f7;
+  color: #09090b;
+  font-size: 0.55rem;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
   border-radius: 8px;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
+  margin-left: 2px;
 }
 .tab-c {
   display: none;
@@ -181,7 +214,7 @@ input, button, textarea {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 16px 18px;
+  padding: 14px 16px;
   padding-bottom: var(--safe-bottom);
 }
 
@@ -197,92 +230,95 @@ input, button, textarea {
   position: relative;
 }
 .logo-t {
-  font-size: 1.4rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: var(--teal);
-  text-shadow: 0 0 24px rgba(30,200,200,0.3);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text);
 }
 .logo-s {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--sub);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .pin-dots {
   display: flex;
   gap: 14px;
-  margin: 8px 0;
+  margin: 10px 0;
 }
 .pin-dot {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 2px solid var(--bd);
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .pin-dot.filled {
-  background: var(--teal);
-  border-color: var(--teal);
-  box-shadow: 0 0 12px rgba(30,200,200,0.5);
+  background: #f4f4f7;
+  border-color: #f4f4f7;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
   transform: scale(1.1);
 }
 .pin-dot.error {
-  border-color: var(--red);
-  background: var(--red);
+  border-color: var(--danger);
+  background: var(--danger);
   animation: shake 0.4s;
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  75% { transform: translateX(8px); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
 }
 .pin-pad {
   display: grid;
-  grid-template-columns: repeat(3, 74px);
+  grid-template-columns: repeat(3, 76px);
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .pin-key {
   height: 60px;
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--card);
   border: 1px solid var(--bd);
   color: var(--text);
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.1s, background 0.12s;
+  transition: all 0.12s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .pin-key:active {
-  background: var(--teal);
-  color: #000;
-  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(0.93);
 }
 .pin-key.fn {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--sub);
-  font-weight: 700;
+  font-weight: 600;
 }
 .gear-btn {
   position: absolute;
   top: var(--safe-top);
   right: 16px;
-  background: var(--card);
-  border: 1px solid var(--bd);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-bd);
   color: var(--sub);
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s;
+}
+.gear-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  transform: scale(0.94);
 }
 
 /* ── Mode Selector ── */
@@ -293,69 +329,84 @@ input, button, textarea {
   align-items: center;
   justify-content: center;
   padding: 32px 20px;
-  gap: 18px;
+  gap: 16px;
 }
 .mode-card {
   width: 100%;
-  max-width: 350px;
-  padding: 24px 20px;
+  max-width: 360px;
+  padding: 22px 20px;
   background: var(--card);
-  border: 1.5px solid var(--bd);
-  border-radius: 22px;
+  border: 1px solid var(--bd);
+  border-radius: 18px;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.2s, background 0.2s;
-  text-align: center;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
 }
 .mode-card:active {
-  border-color: var(--teal);
-  transform: scale(0.97);
-  background: var(--card2);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: scale(0.98);
+  background: var(--card-hover);
 }
-.mode-icon {
-  font-size: 2.6rem;
-  margin-bottom: 10px;
+.mode-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-bd);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .mode-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  margin-bottom: 5px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+  color: var(--text);
 }
 .mode-desc {
   font-size: 0.72rem;
   color: var(--sub);
-  font-weight: 500;
-  line-height: 1.4;
+  font-weight: 400;
+  line-height: 1.45;
 }
 
 /* ── Inputs & Controls ── */
 .inp {
   width: 100%;
-  padding: 13px 15px;
-  border-radius: 14px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
   background: var(--card);
-  border: 1.5px solid var(--bd);
+  border: 1px solid var(--bd);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 500;
   outline: none;
   -webkit-appearance: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s;
 }
 .inp:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(30,200,200,0.15);
+  border-color: var(--bd-focus);
 }
 .inp::placeholder {
-  color: var(--sub);
-  font-weight: 500;
+  color: var(--muted);
+  font-weight: 400;
 }
-.search-bar {
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--bd);
+
+/* ── Catalog Controls (Search & Filter Row) ── */
+.catalog-controls {
+  padding: 12px 16px;
   background: var(--sf);
+  border-bottom: 1px solid var(--bd);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   flex-shrink: 0;
 }
 .search-wrap {
@@ -364,149 +415,212 @@ input, button, textarea {
   align-items: center;
   width: 100%;
 }
+.search-ico {
+  position: absolute;
+  left: 12px;
+  color: var(--sub);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
 .search-wrap .inp {
-  padding-right: 38px;
+  padding-left: 36px;
+  padding-right: 36px;
+  height: 42px;
 }
 .search-clear {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: var(--card2);
-  border: 1px solid var(--bd);
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
   color: var(--sub);
-  font-size: 0.72rem;
-  font-weight: 800;
-  cursor: pointer;
   display: none;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   padding: 0;
-  line-height: 1;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: all 0.12s;
   z-index: 2;
 }
 .search-clear:active {
-  background: var(--teal);
-  color: #000;
-  border-color: var(--teal);
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--text);
 }
 .search-clear.visible {
   display: flex;
 }
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.filter-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  height: 38px;
+  transition: border-color 0.15s;
+}
+.filter-select-wrap:focus-within {
+  border-color: var(--bd-focus);
+}
+.filter-ico {
+  position: absolute;
+  left: 10px;
+  color: var(--sub);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.filter-select {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding-left: 32px;
+  padding-right: 26px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.filter-select option {
+  background: #15151a;
+  color: #f4f4f7;
+  font-size: 0.82rem;
+}
+.select-arrow {
+  position: absolute;
+  right: 8px;
+  color: var(--sub);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 .form-label {
   font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: var(--sub);
   text-transform: uppercase;
   margin-bottom: 8px;
   display: block;
 }
 
-/* ── iOS Segmented Role Cards (3 Choices) ── */
+/* ── Role Selection Cards (Sims 4) ── */
 .role-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 .role-card {
   background: var(--card);
-  border: 2px solid var(--bd);
-  border-radius: 16px;
-  padding: 14px 10px;
+  border: 1px solid var(--bd);
+  border-radius: var(--r-sm);
+  padding: 12px 8px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.15s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
 }
 .role-card:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 .role-card.selected {
-  border-color: var(--teal);
-  background: var(--teal-dim);
-  box-shadow: 0 0 16px rgba(30,200,200,0.25);
-}
-.role-card.role-full.selected {
-  border-color: var(--gold);
-  background: var(--gold-dim);
-  box-shadow: 0 0 16px rgba(255,184,0,0.25);
-}
-.role-card.role-cc.selected {
-  border-color: var(--purple);
-  background: var(--purple-dim);
-  box-shadow: 0 0 16px rgba(139,92,246,0.25);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.07);
 }
 .role-icon {
-  font-size: 1.4rem;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.role-card.selected .role-icon {
+  color: var(--text);
 }
 .role-title {
-  font-size: 0.74rem;
-  font-weight: 900;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 .role-sub {
-  font-size: 0.55rem;
+  font-size: 0.56rem;
   color: var(--sub);
-  font-weight: 600;
+  font-weight: 500;
 }
 
-/* ── Buttons ── */
+/* ── Minimalist Buttons ── */
 .btn {
-  padding: 14px 20px;
-  border-radius: 14px;
+  height: 46px;
+  border-radius: var(--r-sm);
   font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 900;
+  font-size: 0.84rem;
+  font-weight: 700;
   cursor: pointer;
   border: none;
-  transition: transform 0.12s, opacity 0.15s;
-  letter-spacing: 0.04em;
+  transition: all 0.15s ease;
+  letter-spacing: 0.02em;
   width: 100%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 .btn:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
+  opacity: 0.92;
 }
 .btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
   transform: none;
 }
-.btn-teal {
-  background: var(--teal);
-  color: #05050b;
+.btn-primary {
+  background: #f4f4f7;
+  color: #09090b;
+  border: 1px solid rgba(255, 255, 255, 0.9);
 }
-.btn-purple {
-  background: var(--purple);
-  color: #fff;
-}
-.btn-red {
-  background: var(--red-dim);
-  color: var(--red);
-  border: 1.5px solid rgba(255,69,96,0.3);
+.btn-dark {
+  background: #181820;
+  color: #f4f4f7;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 .btn-outline {
-  background: none;
-  border: 1.5px solid var(--bd);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--bd);
   color: var(--sub);
 }
 .btn-outline:active {
-  border-color: var(--teal);
-  color: var(--teal);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.btn-danger {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid var(--danger-bd);
+  color: #f87171;
 }
 
 /* ── Cards & List items ── */
@@ -514,45 +628,125 @@ input, button, textarea {
   background: var(--card);
   border: 1px solid var(--bd);
   border-radius: var(--r);
-  padding: 14px 16px;
-  margin-bottom: 10px;
+  padding: 13px 15px;
+  margin-bottom: 8px;
   cursor: pointer;
-  transition: transform 0.12s, border-color 0.15s;
+  transition: transform 0.12s, border-color 0.15s, background 0.15s;
 }
 .g-card:active {
-  border-color: var(--teal);
-  background: var(--card2);
-  transform: scale(0.985);
+  background: var(--card-hover);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: scale(0.988);
 }
 .g-name {
-  font-size: 0.86rem;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
 }
 .g-meta {
-  font-size: 0.62rem;
-  color: var(--sub);
-  margin-top: 4px;
+  margin-top: 7px;
   display: flex;
+  align-items: center;
   gap: 6px;
   flex-wrap: wrap;
 }
 
 .badge {
-  font-size: 0.52rem;
-  font-weight: 900;
+  font-size: 0.62rem;
+  font-weight: 600;
   padding: 2.5px 7px;
   border-radius: 6px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
-.badge-teal { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(30,200,200,0.25); }
-.badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.25); }
-.badge-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(255,184,0,0.25); }
-.badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,230,118,0.25); }
-.badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,69,96,0.25); }
+.badge-subtle {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--sub);
+}
+.badge-mirror {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e4e4ed;
+}
+.badge-active {
+  background: var(--success-dim);
+  border: 1px solid var(--success-bd);
+  color: var(--success);
+}
+.badge-banned {
+  background: var(--danger-dim);
+  border: 1px solid var(--danger-bd);
+  color: var(--danger);
+}
+.badge-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--sub);
+  padding: 1.5px 5px;
+  border-radius: 4px;
+}
+
+/* ── History Item Card (Store) ── */
+.li-hist {
+  padding: 13px 15px;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.li-hist-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.li-game-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.li-meta {
+  font-size: 0.68rem;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.li-user-email {
+  color: #c8c8d8;
+  font-weight: 600;
+}
+.li-link-box {
+  margin-top: 3px;
+}
+.link-gdrive {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 0.66rem;
+  text-decoration: none;
+  word-break: break-all;
+  transition: all 0.12s;
+}
+.link-gdrive:active {
+  background: rgba(255, 255, 255, 0.1);
+}
 
 .li {
-  padding: 14px 18px;
+  padding: 12px 15px;
   border-bottom: 1px solid var(--bd);
   display: flex;
   align-items: center;
@@ -561,72 +755,73 @@ input, button, textarea {
   transition: background 0.12s;
 }
 .li:active {
-  background: rgba(30, 200, 200, 0.05);
+  background: rgba(255, 255, 255, 0.03);
 }
 .li-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
-  font-weight: 900;
+  font-size: 0.68rem;
+  font-weight: 700;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bd);
+  color: var(--text);
 }
 .li-body {
   flex: 1;
   min-width: 0;
 }
 .li-key {
-  font-size: 0.85rem;
-  font-weight: 800;
+  font-size: 0.84rem;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: 'JetBrains Mono', monospace;
 }
-.li-meta {
-  font-size: 0.62rem;
-  color: var(--sub);
-  font-weight: 600;
-  margin-top: 3px;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-}
 .li-arrow {
-  color: var(--bd);
-  font-size: 1.1rem;
-  flex-shrink: 0;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
 }
 
 .cart-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 15px;
+  padding: 12px 14px;
   background: var(--card);
   border: 1px solid var(--bd);
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   margin-bottom: 8px;
 }
 .cart-item .g-name { flex: 1; font-size: 0.82rem; }
 .cart-rm {
   background: none;
   border: none;
-  color: var(--red);
-  font-size: 1.1rem;
+  color: var(--sub);
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.12s;
+}
+.cart-rm:active {
+  color: var(--danger);
+  background: var(--danger-dim);
 }
 
 /* ── Modal (iOS Bottom Sheet) ── */
 .modal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.72);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 200;
@@ -639,7 +834,7 @@ input, button, textarea {
 }
 .modal-sheet {
   background: var(--sf);
-  border-radius: 24px 24px 0 0;
+  border-radius: 20px 20px 0 0;
   width: 100%;
   max-width: 500px;
   max-height: 88vh;
@@ -648,21 +843,21 @@ input, button, textarea {
   overflow: hidden;
   border: 1px solid var(--bd);
   border-bottom: none;
-  animation: slideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideUp 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
 .modal-handle {
-  width: 40px;
-  height: 5px;
-  background: var(--bd);
-  border-radius: 3px;
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 2px;
   margin: 10px auto 0;
 }
 .modal-hdr {
-  padding: 14px 20px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -670,49 +865,53 @@ input, button, textarea {
 }
 .modal-title {
   flex: 1;
-  font-size: 0.92rem;
-  font-weight: 900;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 .modal-close {
-  background: var(--card);
-  border: 1px solid var(--bd);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-bd);
   color: var(--sub);
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  font-size: 0.9rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.modal-close:active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
 .modal-body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 18px 20px;
+  padding: 16px 18px;
   padding-bottom: var(--safe-bottom);
 }
 .d-row {
   display: flex;
   justify-content: space-between;
   padding: 9px 0;
-  border-bottom: 1px solid var(--bd);
-  font-size: 0.8rem;
+  border-bottom: 1px solid var(--bd-subtle);
+  font-size: 0.78rem;
 }
 .d-row:last-child { border-bottom: none; }
 .d-label {
   color: var(--sub);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.65rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 .d-val {
-  font-weight: 700;
+  font-weight: 600;
   text-align: right;
   max-width: 65%;
   word-break: break-word;
+  color: var(--text);
 }
 .modal-actions {
   display: flex;
@@ -721,20 +920,24 @@ input, button, textarea {
 }
 .btn-act {
   flex: 1;
-  padding: 13px;
-  border-radius: 12px;
+  padding: 11px;
+  border-radius: var(--r-sm);
   font-family: inherit;
-  font-size: 0.76rem;
-  font-weight: 800;
+  font-size: 0.74rem;
+  font-weight: 700;
   cursor: pointer;
-  border: none;
-  transition: transform 0.12s;
-  display: flex;
+  border: 1px solid var(--bd);
+  background: var(--pill-bg);
+  color: var(--text);
+  transition: all 0.12s;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
 }
 .btn-act:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Setup & Diagnostics ── */
@@ -743,64 +946,69 @@ input, button, textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--safe-top) 20px 24px;
-  gap: 14px;
+  padding: var(--safe-top) 18px 24px;
+  gap: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 .setup-box {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 .setup-section {
   background: var(--card);
   border: 1px solid var(--bd);
   border-radius: var(--r);
-  padding: 16px;
-  margin-bottom: 14px;
+  padding: 14px;
 }
 .setup-st {
-  font-size: 0.65rem;
-  padding: 8px 12px;
-  border-radius: 8px;
+  font-size: 0.7rem;
   margin-top: 8px;
-  font-weight: 700;
-  display: none;
+  font-weight: 500;
   line-height: 1.4;
+  word-break: break-word;
 }
-.setup-st.ok { display: block; background: var(--green-dim); border: 1px solid rgba(0,230,118,0.25); color: var(--green); }
-.setup-st.err { display: block; background: var(--red-dim); border: 1px solid rgba(255,69,96,0.25); color: var(--red); }
-.setup-st.wait { display: block; background: var(--card2); border: 1px solid var(--bd); color: var(--sub); }
+.setup-st.ok { color: var(--success); }
+.setup-st.err { color: var(--danger); }
+.setup-st.wait { color: var(--sub); }
 
-/* ── Toast (iOS banner) ── */
+/* ── Toast ── */
 .toast {
   position: fixed;
-  bottom: calc(var(--safe-bottom) + 12px);
+  bottom: calc(var(--safe-bottom) + 16px);
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  padding: 12px 22px;
-  border-radius: 16px;
+  transform: translateX(-50%) translateY(30px);
+  background: #181822;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f4f4f7;
+  padding: 10px 16px;
+  border-radius: 30px;
   font-size: 0.76rem;
-  font-weight: 800;
-  z-index: 999;
+  font-weight: 600;
   opacity: 0;
-  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s;
   pointer-events: none;
-  max-width: 90vw;
+  transition: all 0.22s ease;
+  z-index: 300;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  max-width: 90%;
   text-align: center;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.55);
 }
 .toast.show {
-  transform: translateX(-50%) translateY(0);
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
-.toast.ok { background: var(--teal); color: #000; }
-.toast.err { background: var(--red); color: #fff; }
+.toast.err {
+  border-color: var(--danger-bd);
+  color: #fca5a5;
+}
 
 .stats {
-  padding: 9px 18px;
-  font-size: 0.63rem;
-  font-weight: 700;
+  padding: 8px 16px;
+  font-size: 0.66rem;
+  font-weight: 600;
   color: var(--sub);
   border-bottom: 1px solid var(--bd);
   background: var(--sf);
@@ -808,15 +1016,15 @@ input, button, textarea {
 }
 .empty {
   text-align: center;
-  padding: 44px 20px;
-  color: var(--sub);
+  padding: 40px 20px;
+  color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 .spin {
-  width: 18px;
-  height: 18px;
-  border: 2.5px solid rgba(255,255,255,0.2);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -824,6 +1032,24 @@ input, button, textarea {
   vertical-align: middle;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-sync-mini {
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-bd);
+  color: var(--sub);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-sync-mini:active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
 </style>
 </head>
 <body>
@@ -841,11 +1067,11 @@ input, button, textarea {
       <div class="form-label">The Sims 4 — Firebase RTDB URL</div>
       <input class="inp" id="urlFirebase" placeholder="https://...firebasedatabase.app" style="font-size:.74rem;">
       <div style="margin-top:8px;">
-        <div class="form-label" style="margin-bottom:4px;">Auth Secret (Opsional jika rules butuh token)</div>
+        <div class="form-label" style="margin-bottom:4px;">Auth Secret (Opsional)</div>
         <input class="inp" id="secretFirebase" placeholder="Database secret / auth token" type="password" style="font-size:.74rem;">
       </div>
       <div class="setup-st" id="stFirebase"></div>
-      <button class="btn btn-outline" onclick="testFirebase()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Firebase The Sims 4</button>
+      <button class="btn btn-outline" onclick="testFirebase()" style="margin-top:10px;height:38px;font-size:.74rem;">Tes Koneksi Firebase The Sims 4</button>
     </div>
 
     <!-- Game Store Firebase Section -->
@@ -853,7 +1079,7 @@ input, button, textarea {
       <div class="form-label">Game Store — Firebase RTDB URL (Katalog Cepat)</div>
       <input class="inp" id="urlStoreFirebase" placeholder="https://store-...firebasedatabase.app" style="font-size:.74rem;">
       <div class="setup-st" id="stStoreFirebase"></div>
-      <button class="btn btn-outline" onclick="testStoreFirebase()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Firebase Game Store</button>
+      <button class="btn btn-outline" onclick="testStoreFirebase()" style="margin-top:10px;height:38px;font-size:.74rem;">Tes Koneksi Firebase Game Store</button>
     </div>
 
     <!-- Apps Script Section (Store & General) -->
@@ -862,8 +1088,8 @@ input, button, textarea {
       <input class="inp" id="urlStore" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:.74rem;">
       <div class="setup-st" id="stStore"></div>
       <div style="display:flex;gap:6px;margin-top:10px;">
-        <button class="btn btn-outline" onclick="testStore()" style="flex:1;padding:10px;font-size:.72rem;">Tes Koneksi Script</button>
-        <button class="btn btn-outline" onclick="testBotDrive()" id="btnTestBot" style="flex:1;padding:10px;font-size:.72rem;color:var(--teal);border-color:rgba(30,200,200,0.3);">🤖 Tes Bot Drive</button>
+        <button class="btn btn-outline" onclick="testStore()" style="flex:1;height:38px;font-size:.74rem;">Tes Script</button>
+        <button class="btn btn-outline" onclick="testBotDrive()" id="btnTestBot" style="flex:1;height:38px;font-size:.74rem;">Tes Bot Drive</button>
       </div>
       <div class="setup-st" id="stBotDrive"></div>
     </div>
@@ -873,11 +1099,11 @@ input, button, textarea {
       <div class="form-label">The Sims 4 — Email Apps Script URL (Opsional)</div>
       <input class="inp" id="urlSims" placeholder="Kosongkan jika memakai Apps Script yang sama di atas" style="font-size:.74rem;">
       <div class="setup-st" id="stSims"></div>
-      <button class="btn btn-outline" onclick="testSims()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Email The Sims 4</button>
+      <button class="btn btn-outline" onclick="testSims()" style="margin-top:10px;height:38px;font-size:.74rem;">Tes Email The Sims 4</button>
     </div>
 
-    <button class="btn btn-teal" onclick="saveSetup()" style="margin-top:6px;">SIMPAN & LANJUT</button>
-    <button class="btn btn-outline" onclick="show('scrMode')" style="margin-top:8px;">KEMBALI KE MENU</button>
+    <button class="btn btn-primary" onclick="saveSetup()" style="margin-top:4px;">SIMPAN & LANJUT</button>
+    <button class="btn btn-outline" onclick="show('scrMode')">KEMBALI KE MENU</button>
   </div>
 </div>
 </div>
@@ -893,14 +1119,15 @@ input, button, textarea {
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
   </div>
-  <div style="font-size:.68rem;color:var(--sub);font-weight:700;">Masukkan 6 Digit PIN Admin</div>
+  <div style="font-size:.68rem;color:var(--sub);font-weight:600;">Masukkan 6 Digit PIN Admin</div>
   <div class="pin-pad">
     <button class="pin-key" onclick="pp('1')">1</button><button class="pin-key" onclick="pp('2')">2</button><button class="pin-key" onclick="pp('3')">3</button>
     <button class="pin-key" onclick="pp('4')">4</button><button class="pin-key" onclick="pp('5')">5</button><button class="pin-key" onclick="pp('6')">6</button>
     <button class="pin-key" onclick="pp('7')">7</button><button class="pin-key" onclick="pp('8')">8</button><button class="pin-key" onclick="pp('9')">9</button>
-    <button class="pin-key fn" onclick="_pin='';updDots()">CLR</button><button class="pin-key" onclick="pp('0')">0</button><button class="pin-key fn" onclick="_pin=_pin.slice(0,-1);updDots()">⌫</button>
+    <button class="pin-key fn" onclick="_pin='';updDots()">CLR</button><button class="pin-key" onclick="pp('0')">0</button>
+    <button class="pin-key fn" onclick="_pin=_pin.slice(0,-1);updDots()"><svg class="ico" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
   </div>
-  <button style="margin-top:16px;background:none;border:none;color:var(--sub);font-size:.72rem;font-weight:700;cursor:pointer;" onclick="show('scrMode')">Batal / Kembali</button>
+  <button style="margin-top:16px;background:none;border:none;color:var(--sub);font-size:.72rem;font-weight:600;cursor:pointer;" onclick="show('scrMode')">Batal / Kembali</button>
 </div>
 </div>
 
@@ -908,24 +1135,28 @@ input, button, textarea {
 <!-- 3. MODE SELECTOR                           -->
 <!-- ========================================== -->
 <div class="scr" id="scrMode">
-  <button class="gear-btn" onclick="showSetup()" title="Pengaturan Server">⚙</button>
+  <button class="gear-btn" onclick="showSetup()" title="Pengaturan Server"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   <div class="mode-wrap">
-    <div class="logo-t" style="font-size:1.15rem;">WAROENG GAME ADMIN</div>
+    <div class="logo-t" style="font-size:1.1rem;">WAROENG GAME ADMIN</div>
     <div class="logo-s">PILIH SISTEM MANAJEMEN</div>
 
     <div class="mode-card" onclick="enterMode('sims')">
-      <div class="mode-icon">🏠</div>
-      <div class="mode-title">The Sims 4 Manager</div>
-      <div class="mode-desc">Database murni Firebase RTDB. Input pesanan, pilih role (Full Access / DLC / CC), reset hardware & live license sync.</div>
+      <div class="mode-icon-box"><svg class="ico" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div>
+        <div class="mode-title">The Sims 4 Manager</div>
+        <div class="mode-desc">Database Firebase RTDB. Input pesanan, pilih role (Full Access / DLC / CC), reset hardware & live license sync.</div>
+      </div>
     </div>
 
     <div class="mode-card" onclick="enterMode('store')">
-      <div class="mode-icon">🎮</div>
-      <div class="mode-title">Game Store Manager</div>
-      <div class="mode-desc">Katalog game, keranjang kirim, share GDrive folder, & cabut akses menyeluruh (GDrive + Hugging Face).</div>
+      <div class="mode-icon-box"><svg class="ico" viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg></div>
+      <div>
+        <div class="mode-title">Game Store Manager</div>
+        <div class="mode-desc">Katalog game, filter & sorting lengkap, keranjang, share GDrive folder mirror acak, & cabut akses.</div>
+      </div>
     </div>
 
-    <button style="margin-top:12px;background:none;border:none;color:var(--sub);font-size:.72rem;font-weight:700;cursor:pointer;" onclick="logout()">Kunci Sesi (Logout)</button>
+    <button style="margin-top:12px;background:none;border:none;color:var(--sub);font-size:.72rem;font-weight:600;cursor:pointer;" onclick="logout()">Kunci Sesi (Logout)</button>
   </div>
 </div>
 
@@ -934,18 +1165,18 @@ input, button, textarea {
 <!-- ========================================== -->
 <div class="scr" id="scrSims">
   <div class="app-hdr">
-    <div class="hdr-t" onclick="enterMode('store')" style="cursor:pointer;">
+    <div class="hdr-t" onclick="enterMode('store')">
       <span>THE SIMS 4</span>
-      <span class="hdr-badge">Store ›</span>
+      <span class="hdr-badge">Store <svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </div>
-    <button class="hdr-btn" onclick="sRefresh()" title="Refresh Data">↻</button>
-    <button class="hdr-btn" onclick="enterMode('store')" title="Pindah ke Game Store">🎮</button>
+    <button class="hdr-btn" onclick="sRefresh()" title="Refresh Data"><svg class="ico" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+    <button class="hdr-btn" onclick="enterMode('store')" title="Pindah ke Game Store"><svg class="ico" viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg></button>
   </div>
 
   <div class="tab-bar" id="sTabBar">
-    <button class="tab-btn active" onclick="sTab(0)">➕ Tambah</button>
-    <button class="tab-btn" onclick="sTab(1)">📋 Data Lisensi</button>
-    <button class="tab-btn" onclick="sTab(2)">🕒 Riwayat</button>
+    <button class="tab-btn active" onclick="sTab(0)"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> <span>Tambah</span></button>
+    <button class="tab-btn" onclick="sTab(1)"><svg class="ico" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> <span>Lisensi</span></button>
+    <button class="tab-btn" onclick="sTab(2)"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span>Riwayat</span></button>
   </div>
 
   <!-- Tab 0: Tambah Pesanan -->
@@ -954,7 +1185,7 @@ input, button, textarea {
       <div class="form-label" style="margin-bottom:14px;">INPUT PESANAN BARU</div>
 
       <div class="form-group">
-        <label class="form-label">Email Pembeli (Opsional untuk kirim email)</label>
+        <label class="form-label">Email Pembeli (Opsional)</label>
         <input class="inp" id="sEmail" placeholder="pembeli@gmail.com" type="email">
       </div>
 
@@ -966,18 +1197,18 @@ input, button, textarea {
       <div class="form-group">
         <label class="form-label">Pilih Paket / Role User</label>
         <div class="role-grid">
-          <div class="role-card role-full selected" id="rcFull" onclick="selectSimsRole('FULL_ACCESS')">
-            <div class="role-icon">🌟</div>
+          <div class="role-card selected" id="rcFull" onclick="selectSimsRole('FULL_ACCESS')">
+            <div class="role-icon"><svg class="ico" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
             <div class="role-title">Full Access</div>
             <div class="role-sub">DLC + CC VIP</div>
           </div>
           <div class="role-card" id="rcDlc" onclick="selectSimsRole('DLC_ONLY')">
-            <div class="role-icon">🎮</div>
+            <div class="role-icon"><svg class="ico" viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg></div>
             <div class="role-title">DLC Only</div>
             <div class="role-sub">Unlocker Saja</div>
           </div>
-          <div class="role-card role-cc" id="rcCc" onclick="selectSimsRole('CC_ONLY')">
-            <div class="role-icon">👗</div>
+          <div class="role-card" id="rcCc" onclick="selectSimsRole('CC_ONLY')">
+            <div class="role-icon"><svg class="ico" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
             <div class="role-title">CC Only</div>
             <div class="role-sub">Custom Content</div>
           </div>
@@ -985,13 +1216,13 @@ input, button, textarea {
       </div>
 
       <div class="form-group" style="margin-top:12px;">
-        <label style="display:flex;align-items:center;gap:10px;font-size:.78rem;font-weight:700;cursor:pointer;">
-          <input type="checkbox" id="sSendEmailCheck" checked style="width:18px;height:18px;accent-color:var(--teal);">
+        <label style="display:flex;align-items:center;gap:10px;font-size:.76rem;font-weight:600;cursor:pointer;color:var(--text);">
+          <input type="checkbox" id="sSendEmailCheck" checked style="width:16px;height:16px;accent-color:#ffffff;">
           <span>Kirim email otomatis ke pembeli (jika email diisi)</span>
         </label>
       </div>
 
-      <button class="btn btn-teal" id="sBtnSubmit" onclick="sSubmitOrder()" style="margin-top:10px;">
+      <button class="btn btn-primary" id="sBtnSubmit" onclick="sSubmitOrder()" style="margin-top:10px;">
         SIMPAN KE DATABASE FIREBASE
       </button>
 
@@ -1001,10 +1232,11 @@ input, button, textarea {
 
   <!-- Tab 1: Data Lisensi (Firebase) -->
   <div class="tab-c" id="sT1">
-    <div class="search-bar">
+    <div class="search-bar" style="padding:12px 16px;background:var(--sf);border-bottom:1px solid var(--bd);">
       <div class="search-wrap">
-        <input class="inp" id="sSearch" placeholder="Cari nomor pesanan, role, atau email..." oninput="onSearchInput('sSearch','sSearchClear',sRenderList)" style="font-size:.82rem;">
-        <button class="search-clear" id="sSearchClear" onclick="clearSearch('sSearch','sSearchClear',sRenderList)" title="Clear Search">✕</button>
+        <span class="search-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input class="inp search-inp" id="sSearch" placeholder="Cari nomor pesanan, role, email..." oninput="onSearchInput('sSearch','sSearchClear',sRenderList)">
+        <button class="search-clear" id="sSearchClear" onclick="clearSearch('sSearch','sSearchClear',sRenderList)" title="Clear"><svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
     <div class="stats" id="sStats">Memuat data dari Firebase...</div>
@@ -1015,10 +1247,11 @@ input, button, textarea {
 
   <!-- Tab 2: Riwayat User Terakhir Ditambahkan -->
   <div class="tab-c" id="sT2">
-    <div class="search-bar">
+    <div class="search-bar" style="padding:12px 16px;background:var(--sf);border-bottom:1px solid var(--bd);">
       <div class="search-wrap">
-        <input class="inp" id="sHistSearch" placeholder="Cari riwayat nomor pesanan, role, email..." oninput="onSearchInput('sHistSearch','sHistSearchClear',sRenderHistList)" style="font-size:.82rem;">
-        <button class="search-clear" id="sHistSearchClear" onclick="clearSearch('sHistSearch','sHistSearchClear',sRenderHistList)" title="Clear Search">✕</button>
+        <span class="search-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input class="inp search-inp" id="sHistSearch" placeholder="Cari riwayat pesanan..." oninput="onSearchInput('sHistSearch','sHistSearchClear',sRenderHistList)">
+        <button class="search-clear" id="sHistSearchClear" onclick="clearSearch('sHistSearch','sHistSearchClear',sRenderHistList)" title="Clear"><svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
     <div class="stats" id="sHistStats">Memuat riwayat user terbaru...</div>
@@ -1033,33 +1266,63 @@ input, button, textarea {
 <!-- ========================================== -->
 <div class="scr" id="scrStore">
   <div class="app-hdr">
-    <div class="hdr-t" onclick="enterMode('sims')" style="cursor:pointer;">
+    <div class="hdr-t" onclick="enterMode('sims')">
       <span>GAME STORE</span>
-      <span class="hdr-badge">Sims 4 ›</span>
+      <span class="hdr-badge">Sims 4 <svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </div>
-    <button class="hdr-btn" id="gBtnSyncFb" onclick="gSyncFirebase()" title="Sync HF & Sheets ke Firebase" style="color:var(--teal);border-color:rgba(30,200,200,0.35);font-size:.7rem;padding:0 9px;width:auto;display:inline-flex;align-items:center;gap:4px;">🔄 Sync FB</button>
-    <button class="hdr-btn" onclick="gRefresh()" title="Refresh Katalog">↻</button>
-    <button class="hdr-btn" onclick="enterMode('sims')" title="Pindah ke The Sims 4">🏠</button>
+    <button class="hdr-btn" id="gBtnSyncFb" onclick="gSyncFirebase()" title="Sync HF & Sheets ke Firebase"><svg class="ico" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+    <button class="hdr-btn" onclick="gRefresh()" title="Refresh Katalog"><svg class="ico" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+    <button class="hdr-btn" onclick="enterMode('sims')" title="Pindah ke The Sims 4"><svg class="ico" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
   </div>
 
   <div class="tab-bar" id="gTabBar">
-    <button class="tab-btn active" onclick="gTab(0)">🎮 Katalog</button>
-    <button class="tab-btn" onclick="gTab(1)" style="position:relative;">🛒 Keranjang <span class="cart-badge" id="gCartBadge">0</span></button>
-    <button class="tab-btn" onclick="gTab(2)">📋 Riwayat</button>
-    <button class="tab-btn" onclick="gTab(3)" style="color:var(--red);">⛔ Revoke Akses</button>
+    <button class="tab-btn active" onclick="gTab(0)"><svg class="ico" viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg> <span>Katalog</span></button>
+    <button class="tab-btn" onclick="gTab(1)"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> <span>Keranjang</span> <span class="cart-badge" id="gCartBadge">0</span></button>
+    <button class="tab-btn" onclick="gTab(2)"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span>Riwayat</span></button>
+    <button class="tab-btn" onclick="gTab(3)" style="color:#f87171;"><svg class="ico" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9.5" y1="9.5" x2="14.5" y2="14.5"/><line x1="14.5" y1="9.5" x2="9.5" y2="14.5"/></svg> <span>Revoke</span></button>
   </div>
 
-  <!-- Store Catalog -->
+  <!-- Store Catalog with Filters -->
   <div class="tab-c active" id="gT0">
-    <div class="search-bar">
+    <div class="catalog-controls">
+      <!-- Search -->
       <div class="search-wrap">
-        <input class="inp" id="gSearch" placeholder="Cari nama game atau genre..." oninput="onSearchInput('gSearch','gSearchClear',gRenderGames)" style="font-size:.82rem;">
-        <button class="search-clear" id="gSearchClear" onclick="clearSearch('gSearch','gSearchClear',gRenderGames)" title="Clear Search">✕</button>
+        <span class="search-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input class="inp search-inp" id="gSearch" placeholder="Cari nama game atau genre..." oninput="onSearchInput('gSearch','gSearchClear',gRenderGames)">
+        <button class="search-clear" id="gSearchClear" onclick="clearSearch('gSearch','gSearchClear',gRenderGames)" title="Hapus"><svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <!-- Filters: Genre & Sort Order -->
+      <div class="filter-row">
+        <!-- Genre Filter -->
+        <div class="filter-select-wrap">
+          <span class="filter-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+          <select id="gFilterGenre" class="filter-select" onchange="gRenderGames()">
+            <option value="">Semua Genre</option>
+          </select>
+          <span class="select-arrow"><svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+
+        <!-- Sort Order -->
+        <div class="filter-select-wrap">
+          <span class="filter-ico"><svg class="ico" viewBox="0 0 24 24"><line x1="11" y1="5" x2="11" y2="19"/><polyline points="7 9 11 5 15 9"/><line x1="17" y1="19" x2="17" y2="11"/><polyline points="13 15 17 19 21 15"/></svg></span>
+          <select id="gSortOrder" class="filter-select" onchange="gRenderGames()">
+            <option value="name_asc">Nama: A → Z</option>
+            <option value="name_desc">Nama: Z → A</option>
+            <option value="size_desc">Size: Terbesar</option>
+            <option value="size_asc">Size: Terkecil</option>
+            <option value="default">Default</option>
+          </select>
+          <span class="select-arrow"><svg class="ico ico-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
       </div>
     </div>
+
     <div class="stats" id="gStats" style="display:flex;align-items:center;justify-content:space-between;">
       <span id="gStatsText">Memuat katalog game...</span>
-      <button class="btn-act" onclick="gSyncFirebase()" style="background:var(--teal-dim);color:var(--teal);border:1px solid rgba(30,200,200,0.3);padding:3px 8px;font-size:.62rem;">🔄 Sync Firebase</button>
+      <button class="btn-sync-mini" onclick="gSyncFirebase()" title="Sinkronkan data ke Firebase">
+        <svg class="ico" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> <span>Sync FB</span>
+      </button>
     </div>
     <div class="tab-scroll" id="gGameList"><div class="empty">Memuat katalog...</div></div>
   </div>
@@ -1075,7 +1338,7 @@ input, button, textarea {
         <input class="inp" id="gSendEmail" placeholder="pembeli@gmail.com" type="email">
       </div>
 
-      <button class="btn btn-teal" id="gBtnSend" onclick="gDoSend()" style="margin-top:14px;" disabled>
+      <button class="btn btn-primary" id="gBtnSend" onclick="gDoSend()" style="margin-top:14px;" disabled>
         KIRIM & SHARE GOOGLE DRIVE
       </button>
 
@@ -1085,10 +1348,11 @@ input, button, textarea {
 
   <!-- History -->
   <div class="tab-c" id="gT2">
-    <div class="search-bar">
+    <div class="search-bar" style="padding:12px 16px;background:var(--sf);border-bottom:1px solid var(--bd);">
       <div class="search-wrap">
-        <input class="inp" id="gHistSearch" placeholder="Cari riwayat email / game..." oninput="onSearchInput('gHistSearch','gHistSearchClear',gRenderHist)" style="font-size:.82rem;">
-        <button class="search-clear" id="gHistSearchClear" onclick="clearSearch('gHistSearch','gHistSearchClear',gRenderHist)" title="Clear Search">✕</button>
+        <span class="search-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input class="inp search-inp" id="gHistSearch" placeholder="Cari email pembeli atau nama game..." oninput="onSearchInput('gHistSearch','gHistSearchClear',gRenderHist)">
+        <button class="search-clear" id="gHistSearchClear" onclick="clearSearch('gHistSearch','gHistSearchClear',gRenderHist)" title="Clear"><svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
     <div class="stats" id="gHistStats">Memuat riwayat...</div>
@@ -1098,7 +1362,7 @@ input, button, textarea {
   <!-- Revoke (Cabut Akses GDrive & HF) -->
   <div class="tab-c" id="gT3">
     <div class="tab-scroll">
-      <div class="form-label" style="margin-bottom:8px;color:var(--red);">CABUT AKSES (GOOGLE DRIVE & HUGGING FACE)</div>
+      <div class="form-label" style="margin-bottom:8px;color:#f87171;">CABUT AKSES (GOOGLE DRIVE & HUGGING FACE)</div>
       <p style="font-size:.72rem;color:var(--sub);margin-bottom:14px;line-height:1.5;">
         Fitur ini akan menghapus izin user dari folder Google Drive yang di-share, mencabut game dari database Hugging Face, dan mengupdate status sheet ke BANNED.
       </p>
@@ -1106,8 +1370,8 @@ input, button, textarea {
       <div class="form-group">
         <label class="form-label">Email User yang Ingin Dicabut</label>
         <div class="search-wrap">
-          <input class="inp" id="gRevokeEmail" placeholder="user@gmail.com" type="email" oninput="onSearchInput('gRevokeEmail','gRevokeClear')">
-          <button class="search-clear" id="gRevokeClear" onclick="clearSearch('gRevokeEmail','gRevokeClear')" title="Clear Email">✕</button>
+          <input class="inp search-inp" id="gRevokeEmail" placeholder="user@gmail.com" type="email" oninput="onSearchInput('gRevokeEmail','gRevokeClear')">
+          <button class="search-clear" id="gRevokeClear" onclick="clearSearch('gRevokeEmail','gRevokeClear')" title="Clear Email"><svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
       </div>
 
@@ -1128,7 +1392,7 @@ input, button, textarea {
     <div class="modal-handle"></div>
     <div class="modal-hdr">
       <div class="modal-title" id="mTitle">Detail</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()"><svg class="ico ico-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body" id="mBody"></div>
   </div>
@@ -1212,7 +1476,7 @@ function closeModal() {
 
 function safeKey(k) {
   if (!k) return '';
-  return String(k).trim().replace(/[\.\$\#\[\]\/]/g, '_');
+  return String(k).trim().replace(/[/\\#$.\[\]]/g, '_');
 }
 
 // ── Search Input Controls with Clear Button ──
@@ -1792,23 +2056,23 @@ function sRenderList() {
     const isBound = Boolean(r.device_ids);
     const orderNum = r.order_number || k;
 
-    let roleBadge = '<span class="badge badge-teal">DLC ONLY</span>';
+    let roleBadge = '<span class="badge badge-subtle">DLC ONLY</span>';
     let iconClass = 'background:var(--teal-dim);color:var(--teal);border:1px solid rgba(30,200,200,0.3)';
     let roleText = 'DLC';
 
     if (role === 'FULL_ACCESS') {
-      roleBadge = '<span class="badge badge-gold">FULL ACCESS</span>';
+      roleBadge = '<span class="badge badge-subtle">FULL ACCESS</span>';
       iconClass = 'background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,184,0,0.3)';
       roleText = 'FULL';
     } else if (role === 'CC_ONLY') {
-      roleBadge = '<span class="badge badge-purple">CC ONLY</span>';
+      roleBadge = '<span class="badge badge-subtle">CC ONLY</span>';
       iconClass = 'background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.3)';
       roleText = 'CC';
     }
 
     const boundBadge = isBound
-      ? '<span class="badge badge-green">AKTIF</span>'
-      : '<span class="badge badge-red">BELUM LOGIN</span>';
+      ? '<span class="badge badge-active">AKTIF</span>'
+      : '<span class="badge badge-banned">BELUM LOGIN</span>';
 
     return `
       <div class="li" onclick="sShowDetail('${esc(k)}')">
@@ -1905,23 +2169,23 @@ function sRenderHistList() {
 
   w.innerHTML = list.map((item, idx) => {
     const role = item.role;
-    let roleBadge = '<span class="badge badge-teal">DLC ONLY</span>';
+    let roleBadge = '<span class="badge badge-subtle">DLC ONLY</span>';
     let iconClass = 'background:var(--teal-dim);color:var(--teal);border:1px solid rgba(30,200,200,0.3)';
     let roleText = 'DLC';
 
     if (role === 'FULL_ACCESS') {
-      roleBadge = '<span class="badge badge-gold">FULL ACCESS</span>';
+      roleBadge = '<span class="badge badge-subtle">FULL ACCESS</span>';
       iconClass = 'background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,184,0,0.3)';
       roleText = 'FULL';
     } else if (role === 'CC_ONLY') {
-      roleBadge = '<span class="badge badge-purple">CC ONLY</span>';
+      roleBadge = '<span class="badge badge-subtle">CC ONLY</span>';
       iconClass = 'background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.3)';
       roleText = 'CC';
     }
 
     const boundBadge = item.device_ids
-      ? '<span class="badge badge-green">AKTIF</span>'
-      : '<span class="badge badge-red">BELUM LOGIN</span>';
+      ? '<span class="badge badge-active">AKTIF</span>'
+      : '<span class="badge badge-banned">BELUM LOGIN</span>';
 
     const dateStr = item.created_at ? formatSimsDate(item.created_at) : ('User #' + (idx + 1));
 
@@ -2085,7 +2349,10 @@ function gTab(i) {
     if (c) c.classList.toggle('active', j === i);
   }
   if (i === 0 && !_gGames.length) gRefresh();
-  if (i === 2) gRefreshHist();
+  if (i === 2) {
+    if (!_gGames.length) gRefresh();
+    gRefreshHist();
+  }
 }
 
 async function apiStorePost(data) {
@@ -2120,6 +2387,7 @@ async function gRefresh() {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         _gGames = data;
+        gPopulateGenreFilter();
         gRenderGames();
         if (statsText) statsText.textContent = _gGames.length + ' game aktif (Firebase RTDB)';
         return;
@@ -2139,6 +2407,7 @@ async function gRefresh() {
     const d = await apiStoreGet({ action: 'games' });
     if (d.status === 'ok') {
       _gGames = d.data || [];
+      gPopulateGenreFilter();
       gRenderGames();
       if (statsText) statsText.textContent = _gGames.length + ' game dimuat';
     } else {
@@ -2188,30 +2457,107 @@ function getGameParts(g) {
   return 1;
 }
 
+
+// ── Size Parser for Accurate Numerical Sorting ──
+function parseSizeToMB(sz) {
+  if (!sz) return 0;
+  if (typeof sz === 'number') return sz;
+  const str = String(sz).trim().toUpperCase();
+  const num = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+  if (str.includes('TB')) return num * 1048576;
+  if (str.includes('GB')) return num * 1024;
+  if (str.includes('MB')) return num;
+  if (str.includes('KB')) return num / 1024;
+  return num;
+}
+
+// ── Real Game Name Resolver for History & Detail ──
+function getGameName(gameId) {
+  if (!gameId) return '-';
+  const found = _gGames.find(x => x.id === gameId);
+  return (found && found.name) ? found.name : gameId;
+}
+
+// ── Populate Dynamic Genre Filter Dropdown ──
+function gPopulateGenreFilter() {
+  const sel = document.getElementById('gFilterGenre');
+  if (!sel) return;
+  const currentVal = sel.value;
+  const genres = new Set();
+
+  _gGames.forEach(g => {
+    if (g.genre) {
+      g.genre.split(/[,/|]/).forEach(item => {
+        const trimmed = item.trim();
+        if (trimmed && trimmed.length > 1) genres.add(trimmed);
+      });
+    }
+  });
+
+  const sorted = Array.from(genres).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  let opts = '<option value="">Semua Genre (' + _gGames.length + ')</option>';
+  sorted.forEach(gn => {
+    const isSel = (gn === currentVal) ? ' selected' : '';
+    opts += '<option value="' + esc(gn) + '"' + isSel + '>' + esc(gn) + '</option>';
+  });
+  sel.innerHTML = opts;
+}
+
 function gRenderGames() {
   const q = (document.getElementById('gSearch').value || '').toLowerCase().trim();
-  const f = _gGames.filter(g => !q || g.name.toLowerCase().includes(q) || (g.genre && g.genre.toLowerCase().includes(q)));
+  const genreFilter = (document.getElementById('gFilterGenre') ? document.getElementById('gFilterGenre').value : '').toLowerCase().trim();
+  const sortOrder = (document.getElementById('gSortOrder') ? document.getElementById('gSortOrder').value : 'name_asc');
+
+  let f = _gGames.filter(g => {
+    // 1. Text Search (Name or ID)
+    const matchesQuery = !q ||
+      (g.name && g.name.toLowerCase().includes(q)) ||
+      (g.id && g.id.toLowerCase().includes(q));
+
+    // 2. Genre Filter
+    const matchesGenre = !genreFilter ||
+      (g.genre && g.genre.toLowerCase().includes(genreFilter));
+
+    return matchesQuery && matchesGenre;
+  });
+
+  // 3. Sorting logic
+  if (sortOrder === 'name_asc') {
+    f.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+  } else if (sortOrder === 'name_desc') {
+    f.sort((a, b) => (b.name || '').localeCompare(a.name || '', undefined, { sensitivity: 'base' }));
+  } else if (sortOrder === 'size_desc') {
+    f.sort((a, b) => parseSizeToMB(b.size) - parseSizeToMB(a.size));
+  } else if (sortOrder === 'size_asc') {
+    f.sort((a, b) => parseSizeToMB(a.size) - parseSizeToMB(b.size));
+  }
 
   const statsText = document.getElementById('gStatsText') || document.getElementById('gStats');
   if (statsText) statsText.textContent = f.length + ' dari ' + _gGames.length + ' game';
+
   const w = document.getElementById('gGameList');
   if (!f.length) {
-    w.innerHTML = '<div class="empty">Game tidak ditemukan</div>';
+    w.innerHTML = '<div class="empty">Game tidak ditemukan dengan filter saat ini</div>';
     return;
   }
 
-  w.innerHTML = f.map(g => `
-    <div class="g-card" onclick="gShowGame('${esc(g.id)}')">
-      <div class="g-name">${esc(g.name)}</div>
-      <div class="g-meta">
-        <span class="badge badge-teal">${esc(g.size || '-')}</span>
-        <span class="badge badge-gold">${esc(getGameParts(g))} Part</span>
-        <span class="badge badge-purple">${esc(g.genre || 'Game')}</span>
-        ${g.folder_ids && g.folder_ids.length ? '<span class="badge badge-green">' + g.folder_ids.length + ' Mirror</span>' : ''}
+  w.innerHTML = f.map(g => {
+    const mirrors = (g.folder_ids || []).length;
+    const parts = getGameParts(g);
+    return `
+      <div class="g-card" onclick="gShowGame('${esc(g.id)}')">
+        <div class="g-name">${esc(g.name)}</div>
+        <div class="g-meta">
+          <span class="badge badge-subtle">${esc(g.size || '-')}</span>
+          <span class="badge badge-subtle">${esc(parts)} Part</span>
+          <span class="badge badge-subtle">${esc(g.genre || 'Game')}</span>
+          ${mirrors > 0 ? '<span class="badge badge-mirror">' + mirrors + ' Mirror</span>' : ''}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
+
 
 function gShowGame(id) {
   const g = _gGames.find(x => x.id === id);
@@ -2231,7 +2577,7 @@ function gShowGame(id) {
     <div style="margin-top:18px;">
       ${inCart
         ? '<button class="btn btn-outline" disabled>Sudah Ada di Keranjang</button>'
-        : '<button class="btn btn-purple" onclick="gAddCart(\'' + esc(g.id) + '\')">Tambah ke Keranjang</button>'}
+        : '<button class="btn btn-primary" onclick="gAddCart(\'' + esc(g.id) + '\')">Tambah ke Keranjang</button>'}
     </div>
   `;
   document.getElementById('modal').classList.add('open');
@@ -2280,7 +2626,7 @@ function gRenderCart() {
   w.innerHTML = _gCart.map(c => `
     <div class="cart-item">
       <div class="g-name">${esc(c.name)}</div>
-      <span class="badge badge-teal">${esc(c.size)}</span>
+      <span class="badge badge-subtle">${esc(c.size)}</span>
       <button class="cart-rm" onclick="gRmCart('${esc(c.id)}')">✕</button>
     </div>
   `).join('');
@@ -2362,38 +2708,58 @@ async function gRefreshHist() {
   }
 }
 
-function gRenderHist() {
-  const q = (document.getElementById('gHistSearch').value || '').toLowerCase().trim();
-  const f = _gHist.filter(h => !q || (h.email && h.email.toLowerCase().includes(q)) || (h.game_id && h.game_id.toLowerCase().includes(q)) || (h.game_link && h.game_link.toLowerCase().includes(q)));
 
-  document.getElementById('gHistStats').textContent = f.length + ' dari ' + _gHist.length + ' riwayat';
+function gRenderHist() {
+  const q = (document.getElementById('gHistSearch') ? document.getElementById('gHistSearch').value : '').toLowerCase().trim();
+  const f = _gHist.filter(h => {
+    if (!q) return true;
+    const realName = getGameName(h.game_id).toLowerCase();
+    const gameId = (h.game_id || '').toLowerCase();
+    const email = (h.email || '').toLowerCase();
+    const link = (h.game_link || '').toLowerCase();
+    return realName.includes(q) || gameId.includes(q) || email.includes(q) || link.includes(q);
+  });
+
+  const statsEl = document.getElementById('gHistStats');
+  if (statsEl) statsEl.textContent = f.length + ' dari ' + _gHist.length + ' transaksi';
+
   const w = document.getElementById('gHistList');
   if (!f.length) {
-    w.innerHTML = '<div class="empty">Tidak ada riwayat</div>';
+    w.innerHTML = '<div class="empty">Belum ada riwayat pesanan</div>';
     return;
   }
 
-  w.innerHTML = f.map(h => `
-    <div class="li" style="cursor:default;flex-direction:column;align-items:flex-start;gap:6px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-        <div class="li-key" style="font-size:.82rem;">${esc(h.email)}</div>
-        <span class="badge ${h.status === 'ACTIVE' ? 'badge-green' : 'badge-red'}">${esc(h.status)}</span>
-      </div>
-      <div class="li-meta" style="width:100%;">
-        <span style="font-weight:700;color:var(--text);">${esc(h.game_id)}</span>
-        <span>&bull;</span>
-        <span>${esc(String(h.date || '').substring(0, 19))}</span>
-      </div>
-      ${h.game_link ? `
-        <div style="margin-top:2px;font-size:0.66rem;word-break:break-all;width:100%;">
-          <a href="${esc(h.game_link)}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--teal-dim);border-radius:6px;border:1px solid rgba(30,200,200,0.25);">
-            📁 ${esc(h.game_link)}
-          </a>
+  w.innerHTML = f.map(h => {
+    const realTitle = getGameName(h.game_id);
+    const dateStr = String(h.date || '').substring(0, 19).replace('T', ' ');
+    const isBan = (h.status === 'BANNED' || h.status === 'REVOKED');
+    const badgeClass = isBan ? 'badge-banned' : 'badge-active';
+
+    return `
+      <div class="li-hist">
+        <div class="li-hist-top">
+          <div class="li-game-name">${esc(realTitle)}</div>
+          <span class="badge ${badgeClass}">${esc(h.status || 'SENT')}</span>
         </div>
-      ` : ''}
-    </div>
-  `).join('');
+        <div class="li-meta">
+          <span class="badge-code">${esc(h.game_id)}</span>
+          <span>&bull;</span>
+          <span class="li-user-email">${esc(h.email || '-')}</span>
+          <span>&bull;</span>
+          <span>${esc(dateStr)}</span>
+        </div>
+        ${h.game_link ? `
+          <div class="li-link-box">
+            <a href="${esc(h.game_link)}" target="_blank" rel="noopener noreferrer" class="link-gdrive">
+              <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> <span>Buka Folder Google Drive</span>
+            </a>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
 }
+
 
 // ── REVOKE CONTROLLER (CABUT GDRIVE & HF) ───────────────────
 async function gRevokeScan() {
@@ -2433,8 +2799,8 @@ async function gRevokeScan() {
               <div class="g-name" style="font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <span>${esc(r.name || r.game_id)}</span>
                 ${r.status === 'BANNED'
-                  ? '<span class="badge badge-red" style="font-size:.6rem;padding:2px 6px;">BANNED</span>'
-                  : '<span class="badge badge-green" style="font-size:.6rem;padding:2px 6px;">ACTIVE</span>'}
+                  ? '<span class="badge badge-banned" style="font-size:.6rem;padding:2px 6px;">BANNED</span>'
+                  : '<span class="badge badge-active" style="font-size:.6rem;padding:2px 6px;">ACTIVE</span>'}
               </div>
               <button class="btn-act" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,69,96,0.3);padding:6px 14px;font-size:.7rem;flex:none;" onclick="gRevokeOne(${i})">
                 Cabut
