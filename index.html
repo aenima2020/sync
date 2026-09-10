@@ -358,6 +358,45 @@ input, button, textarea {
   background: var(--sf);
   flex-shrink: 0;
 }
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.search-wrap .inp {
+  padding-right: 38px;
+}
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--card2);
+  border: 1px solid var(--bd);
+  color: var(--sub);
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  z-index: 2;
+}
+.search-clear:active {
+  background: var(--teal);
+  color: #000;
+  border-color: var(--teal);
+}
+.search-clear.visible {
+  display: flex;
+}
 .form-group {
   margin-bottom: 18px;
 }
@@ -943,7 +982,10 @@ input, button, textarea {
   <!-- Tab 1: Data Lisensi (Firebase) -->
   <div class="tab-c" id="sT1">
     <div class="search-bar">
-      <input class="inp" id="sSearch" placeholder="Cari nomor pesanan, role, atau email..." oninput="sRenderList()" style="font-size:.82rem;">
+      <div class="search-wrap">
+        <input class="inp" id="sSearch" placeholder="Cari nomor pesanan, role, atau email..." oninput="onSearchInput('sSearch','sSearchClear',sRenderList)" style="font-size:.82rem;">
+        <button class="search-clear" id="sSearchClear" onclick="clearSearch('sSearch','sSearchClear',sRenderList)" title="Clear Search">✕</button>
+      </div>
     </div>
     <div class="stats" id="sStats">Memuat data dari Firebase...</div>
     <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--safe-bottom);" id="sList">
@@ -1001,7 +1043,10 @@ input, button, textarea {
   <!-- Store Catalog -->
   <div class="tab-c active" id="gT0">
     <div class="search-bar">
-      <input class="inp" id="gSearch" placeholder="Cari nama game atau genre..." oninput="gRenderGames()" style="font-size:.82rem;">
+      <div class="search-wrap">
+        <input class="inp" id="gSearch" placeholder="Cari nama game atau genre..." oninput="onSearchInput('gSearch','gSearchClear',gRenderGames)" style="font-size:.82rem;">
+        <button class="search-clear" id="gSearchClear" onclick="clearSearch('gSearch','gSearchClear',gRenderGames)" title="Clear Search">✕</button>
+      </div>
     </div>
     <div class="stats" id="gStats">Memuat katalog game...</div>
     <div class="tab-scroll" id="gGameList"><div class="empty">Memuat katalog...</div></div>
@@ -1029,7 +1074,10 @@ input, button, textarea {
   <!-- History -->
   <div class="tab-c" id="gT2">
     <div class="search-bar">
-      <input class="inp" id="gHistSearch" placeholder="Cari riwayat email / game..." oninput="gRenderHist()" style="font-size:.82rem;">
+      <div class="search-wrap">
+        <input class="inp" id="gHistSearch" placeholder="Cari riwayat email / game..." oninput="onSearchInput('gHistSearch','gHistSearchClear',gRenderHist)" style="font-size:.82rem;">
+        <button class="search-clear" id="gHistSearchClear" onclick="clearSearch('gHistSearch','gHistSearchClear',gRenderHist)" title="Clear Search">✕</button>
+      </div>
     </div>
     <div class="stats" id="gHistStats">Memuat riwayat...</div>
     <div class="tab-scroll" id="gHistList"><div class="empty">Memuat riwayat...</div></div>
@@ -1045,7 +1093,10 @@ input, button, textarea {
 
       <div class="form-group">
         <label class="form-label">Email User yang Ingin Dicabut</label>
-        <input class="inp" id="gRevokeEmail" placeholder="user@gmail.com" type="email">
+        <div class="search-wrap">
+          <input class="inp" id="gRevokeEmail" placeholder="user@gmail.com" type="email" oninput="onSearchInput('gRevokeEmail','gRevokeClear')">
+          <button class="search-clear" id="gRevokeClear" onclick="clearSearch('gRevokeEmail','gRevokeClear')" title="Clear Email">✕</button>
+        </div>
       </div>
 
       <button class="btn btn-outline" onclick="gRevokeScan()" id="gBtnRevokeScan">
@@ -1146,6 +1197,27 @@ function closeModal() {
 function safeKey(k) {
   if (!k) return '';
   return String(k).trim().replace(/[\.\$\#\[\]\/]/g, '_');
+}
+
+// ── Search Input Controls with Clear Button ──
+function onSearchInput(inputId, clearBtnId, callback) {
+  const inp = document.getElementById(inputId);
+  const btn = document.getElementById(clearBtnId);
+  if (btn && inp) {
+    btn.classList.toggle('visible', Boolean(inp.value && inp.value.trim().length > 0));
+  }
+  if (typeof callback === 'function') callback();
+}
+
+function clearSearch(inputId, clearBtnId, callback) {
+  const inp = document.getElementById(inputId);
+  if (inp) {
+    inp.value = '';
+    inp.focus();
+  }
+  const btn = document.getElementById(clearBtnId);
+  if (btn) btn.classList.remove('visible');
+  if (typeof callback === 'function') callback();
 }
 
 // ── SETUP SCREEN ──────────────────────────────────────────
@@ -1685,6 +1757,7 @@ function gRenderGames() {
       <div class="g-name">${esc(g.name)}</div>
       <div class="g-meta">
         <span class="badge badge-teal">${esc(g.size || '-')}</span>
+        <span class="badge badge-gold">${esc(g.parts || 1)} Part</span>
         <span class="badge badge-purple">${esc(g.genre || 'Game')}</span>
         ${g.folder_ids && g.folder_ids.length ? '<span class="badge badge-green">' + g.folder_ids.length + ' Mirror</span>' : ''}
       </div>
@@ -1701,9 +1774,8 @@ function gShowGame(id) {
   document.getElementById('mBody').innerHTML = `
     <div class="d-row"><div class="d-label">Game ID</div><div class="d-val" style="font-family:'JetBrains Mono';font-size:.74rem;">${esc(g.id)}</div></div>
     <div class="d-row"><div class="d-label">Ukuran</div><div class="d-val">${esc(g.size)}</div></div>
+    <div class="d-row"><div class="d-label">Jumlah Part</div><div class="d-val" style="color:var(--gold);font-weight:900;">${esc(g.parts || 1)} Part</div></div>
     <div class="d-row"><div class="d-label">Genre</div><div class="d-val">${esc(g.genre)}</div></div>
-    ${g.min_specs ? '<div class="d-row"><div class="d-label">Min Specs</div><div class="d-val" style="font-size:.68rem;">' + esc(g.min_specs) + '</div></div>' : ''}
-    ${g.rec_specs ? '<div class="d-row"><div class="d-label">Rec Specs</div><div class="d-val" style="font-size:.68rem;">' + esc(g.rec_specs) + '</div></div>' : ''}
     ${g.note ? '<div class="d-row"><div class="d-label">Note</div><div class="d-val" style="font-size:.68rem;">' + esc(g.note) + '</div></div>' : ''}
     <div class="d-row"><div class="d-label">Server Mirror</div><div class="d-val">${(g.folder_ids || []).length} server GDrive</div></div>
 
@@ -1838,7 +1910,7 @@ async function gRefreshHist() {
 
 function gRenderHist() {
   const q = (document.getElementById('gHistSearch').value || '').toLowerCase().trim();
-  const f = _gHist.filter(h => !q || (h.email && h.email.toLowerCase().includes(q)) || (h.game_id && h.game_id.toLowerCase().includes(q)));
+  const f = _gHist.filter(h => !q || (h.email && h.email.toLowerCase().includes(q)) || (h.game_id && h.game_id.toLowerCase().includes(q)) || (h.game_link && h.game_link.toLowerCase().includes(q)));
 
   document.getElementById('gHistStats').textContent = f.length + ' dari ' + _gHist.length + ' riwayat';
   const w = document.getElementById('gHistList');
@@ -1848,15 +1920,23 @@ function gRenderHist() {
   }
 
   w.innerHTML = f.map(h => `
-    <div class="li" style="cursor:default;">
-      <div class="li-body">
+    <div class="li" style="cursor:default;flex-direction:column;align-items:flex-start;gap:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
         <div class="li-key" style="font-size:.82rem;">${esc(h.email)}</div>
-        <div class="li-meta">
-          <span>${esc(h.game_id)}</span>
-          <span class="badge ${h.status === 'ACTIVE' ? 'badge-green' : 'badge-red'}">${esc(h.status)}</span>
-          <span>${esc(String(h.date || '').substring(0, 19))}</span>
-        </div>
+        <span class="badge ${h.status === 'ACTIVE' ? 'badge-green' : 'badge-red'}">${esc(h.status)}</span>
       </div>
+      <div class="li-meta" style="width:100%;">
+        <span style="font-weight:700;color:var(--text);">${esc(h.game_id)}</span>
+        <span>&bull;</span>
+        <span>${esc(String(h.date || '').substring(0, 19))}</span>
+      </div>
+      ${h.game_link ? `
+        <div style="margin-top:2px;font-size:0.66rem;word-break:break-all;width:100%;">
+          <a href="${esc(h.game_link)}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--teal-dim);border-radius:6px;border:1px solid rgba(30,200,200,0.25);">
+            📁 ${esc(h.game_link)}
+          </a>
+        </div>
+      ` : ''}
     </div>
   `).join('');
 }
@@ -1894,11 +1974,20 @@ async function gRevokeScan() {
 
       _gRvData.forEach((r, i) => {
         h += `
-          <div class="cart-item">
-            <div class="g-name">${esc(r.name || r.game_id)}</div>
-            <button class="btn-act" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,69,96,0.3);padding:6px 12px;font-size:.7rem;" onclick="gRevokeOne(${i})">
-              Cabut
-            </button>
+          <div class="cart-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+              <div class="g-name" style="font-weight:800;">${esc(r.name || r.game_id)}</div>
+              <button class="btn-act" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,69,96,0.3);padding:6px 14px;font-size:.7rem;flex:none;" onclick="gRevokeOne(${i})">
+                Cabut
+              </button>
+            </div>
+            ${r.game_link ? `
+              <div style="font-size:.66rem;word-break:break-all;width:100%;">
+                <a href="${esc(r.game_link)}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                  📁 ${esc(r.game_link)}
+                </a>
+              </div>
+            ` : ''}
           </div>
         `;
       });
@@ -1924,8 +2013,9 @@ async function gRevokeOne(i) {
   const r = _gRvData[i];
   if (!r) return;
   const email = document.getElementById('gRevokeEmail').value.trim();
+  const linkInfo = r.game_link ? `\nFolder: ${r.game_link}` : '';
 
-  if (!confirm(`Cabut akses "${r.name}" untuk ${email}?\nIni akan mencabut izin folder Google Drive dan data Hugging Face.`)) return;
+  if (!confirm(`Cabut akses "${r.name}" untuk ${email}?${linkInfo}\nIni akan mencabut izin folder Google Drive dan data Hugging Face.`)) return;
 
   toast('Sedang mencabut akses...', 0);
   try {
