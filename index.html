@@ -848,12 +848,20 @@ input, button, textarea {
       <button class="btn btn-outline" onclick="testFirebase()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Firebase</button>
     </div>
 
-    <!-- Apps Script Section -->
+    <!-- Apps Script Section (Store & General) -->
     <div class="setup-section">
-      <div class="form-label">Game Store & Email — Apps Script URL</div>
+      <div class="form-label">Game Store & Main Apps Script URL</div>
       <input class="inp" id="urlStore" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:.74rem;">
       <div class="setup-st" id="stStore"></div>
-      <button class="btn btn-outline" onclick="testStore()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Apps Script</button>
+      <button class="btn btn-outline" onclick="testStore()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Apps Script Game Store</button>
+    </div>
+
+    <!-- Sims 4 Email Apps Script (Optional) -->
+    <div class="setup-section">
+      <div class="form-label">The Sims 4 — Email Apps Script URL (Opsional)</div>
+      <input class="inp" id="urlSims" placeholder="Kosongkan jika memakai Apps Script yang sama di atas" style="font-size:.74rem;">
+      <div class="setup-st" id="stSims"></div>
+      <button class="btn btn-outline" onclick="testSims()" style="margin-top:10px;padding:10px;font-size:.72rem;">Tes Koneksi Email The Sims 4</button>
     </div>
 
     <button class="btn btn-teal" onclick="saveSetup()" style="margin-top:6px;">SIMPAN & LANJUT</button>
@@ -1137,6 +1145,7 @@ const DEFAULT_PIN = '190619';
 let FIREBASE_URL = localStorage.getItem('wg_sims_firebase') || DEFAULT_FIREBASE_URL;
 let FIREBASE_SECRET = localStorage.getItem('wg_sims_fb_secret') || '';
 let STORE_API = localStorage.getItem('wg_store_api') || '';
+let SIMS_API = localStorage.getItem('wg_sims_api') || '';
 
 let _pin = '';
 let _mode = '';
@@ -1225,6 +1234,7 @@ function showSetup() {
   document.getElementById('urlFirebase').value = FIREBASE_URL;
   document.getElementById('secretFirebase').value = FIREBASE_SECRET;
   document.getElementById('urlStore').value = STORE_API;
+  document.getElementById('urlSims').value = SIMS_API;
   show('scrSetup');
 }
 
@@ -1232,9 +1242,10 @@ function saveSetup() {
   let fb = document.getElementById('urlFirebase').value.trim();
   const fbs = document.getElementById('secretFirebase').value.trim();
   const st = document.getElementById('urlStore').value.trim();
+  const sa = document.getElementById('urlSims').value.trim();
 
   if (fb.endsWith('/')) fb = fb.slice(0, -1);
-  if (!fb && !st) {
+  if (!fb && !st && !sa) {
     toast('Isi minimal satu endpoint server', 1);
     return;
   }
@@ -1242,10 +1253,12 @@ function saveSetup() {
   FIREBASE_URL = fb || DEFAULT_FIREBASE_URL;
   FIREBASE_SECRET = fbs;
   STORE_API = st;
+  SIMS_API = sa;
 
   localStorage.setItem('wg_sims_firebase', FIREBASE_URL);
   localStorage.setItem('wg_sims_fb_secret', FIREBASE_SECRET);
   localStorage.setItem('wg_store_api', STORE_API);
+  localStorage.setItem('wg_sims_api', SIMS_API);
 
   toast('Konfigurasi server tersimpan!', 0);
   setTimeout(() => show('scrMode'), 400);
@@ -1289,7 +1302,7 @@ async function testStore() {
   const u = document.getElementById('urlStore').value.trim();
   if (!u) {
     st.className = 'setup-st err';
-    st.textContent = 'URL Apps Script kosong';
+    st.textContent = 'URL Apps Script Game Store kosong';
     return;
   }
 
@@ -1302,6 +1315,34 @@ async function testStore() {
     if (d.status === 'ok') {
       st.className = 'setup-st ok';
       st.textContent = '✅ Apps Script terhubung: ' + (d.message || 'OK');
+    } else {
+      st.className = 'setup-st err';
+      st.textContent = d.message || 'Error response';
+    }
+  } catch (err) {
+    st.className = 'setup-st err';
+    st.textContent = 'Gagal konek: ' + err.message;
+  }
+}
+
+async function testSims() {
+  const st = document.getElementById('stSims');
+  const u = document.getElementById('urlSims').value.trim() || document.getElementById('urlStore').value.trim();
+  if (!u) {
+    st.className = 'setup-st err';
+    st.textContent = 'URL Apps Script kosong';
+    return;
+  }
+
+  st.className = 'setup-st wait';
+  st.textContent = 'Testing Sims 4 Apps Script...';
+
+  try {
+    const res = await fetch(u + '?action=ping', { redirect: 'follow' });
+    const d = await res.json();
+    if (d.status === 'ok') {
+      st.className = 'setup-st ok';
+      st.textContent = '✅ The Sims 4 Script terhubung: ' + (d.message || 'OK');
     } else {
       st.className = 'setup-st err';
       st.textContent = d.message || 'Error response';
@@ -1462,9 +1503,10 @@ async function sSubmitOrder() {
 
     let emailMsg = '';
     // Kirim email notifikasi jika dicentang dan email diisi
-    if (sendEmail && emailInput && emailInput.includes('@') && STORE_API) {
+    const targetSimsApi = SIMS_API || STORE_API;
+    if (sendEmail && emailInput && emailInput.includes('@') && targetSimsApi) {
       try {
-        const mailRes = await fetch(STORE_API, {
+        let mailRes = await fetch(targetSimsApi, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
           body: JSON.stringify({
@@ -1472,13 +1514,36 @@ async function sSubmitOrder() {
             action: 'sims_email',
             email: emailInput,
             licensekey: keyInput,
-            role: _currentSimsRole
+            role: _currentSimsRole,
+            ccaccess: allowCC ? 'Yes' : 'No'
           })
         });
-        const mailData = await mailRes.json();
-        if (mailData.status === 'ok') emailMsg = ' & Email pesanan terkirim!';
+        let mailData = await mailRes.json();
+
+        // Fallback: Jika script lama hanya mendukung action 'resend' atau 'add'
+        if (mailData.status !== 'ok' && mailData.message && mailData.message.toLowerCase().includes('action')) {
+          mailRes = await fetch(targetSimsApi, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body: JSON.stringify({
+              pin: _cachedPin || DEFAULT_PIN,
+              action: 'resend',
+              email: emailInput,
+              licensekey: keyInput,
+              order_number: keyInput,
+              role: _currentSimsRole
+            })
+          });
+          mailData = await mailRes.json();
+        }
+
+        if (mailData.status === 'ok') {
+          emailMsg = ' & Email pesanan terkirim!';
+        } else {
+          emailMsg = ' (Data tersimpan di Firebase, notifikasi email: ' + (mailData.message || 'gagal') + ')';
+        }
       } catch(mErr) {
-        emailMsg = ' (Data tersimpan, tapi email gagal terkirim)';
+        emailMsg = ' (Data tersimpan di Firebase, tapi email gagal terkirim: ' + mErr.message + ')';
       }
     }
 
@@ -1741,6 +1806,12 @@ async function gRefresh() {
   }
 }
 
+function getGameParts(g) {
+  if (g.file_parts !== undefined && g.file_parts !== null && g.file_parts !== '') return g.file_parts;
+  if (g.parts !== undefined && g.parts !== null && g.parts !== '') return g.parts;
+  return 1;
+}
+
 function gRenderGames() {
   const q = (document.getElementById('gSearch').value || '').toLowerCase().trim();
   const f = _gGames.filter(g => !q || g.name.toLowerCase().includes(q) || (g.genre && g.genre.toLowerCase().includes(q)));
@@ -1757,7 +1828,7 @@ function gRenderGames() {
       <div class="g-name">${esc(g.name)}</div>
       <div class="g-meta">
         <span class="badge badge-teal">${esc(g.size || '-')}</span>
-        <span class="badge badge-gold">${esc(g.parts || 1)} Part</span>
+        <span class="badge badge-gold">${esc(getGameParts(g))} Part</span>
         <span class="badge badge-purple">${esc(g.genre || 'Game')}</span>
         ${g.folder_ids && g.folder_ids.length ? '<span class="badge badge-green">' + g.folder_ids.length + ' Mirror</span>' : ''}
       </div>
@@ -1770,11 +1841,12 @@ function gShowGame(id) {
   if (!g) return;
 
   const inCart = _gCart.some(c => c.id === id);
+  const partsVal = getGameParts(g) + ' Part';
   document.getElementById('mTitle').textContent = g.name;
   document.getElementById('mBody').innerHTML = `
     <div class="d-row"><div class="d-label">Game ID</div><div class="d-val" style="font-family:'JetBrains Mono';font-size:.74rem;">${esc(g.id)}</div></div>
     <div class="d-row"><div class="d-label">Ukuran</div><div class="d-val">${esc(g.size)}</div></div>
-    <div class="d-row"><div class="d-label">Jumlah Part</div><div class="d-val" style="color:var(--gold);font-weight:900;">${esc(g.parts || 1)} Part</div></div>
+    <div class="d-row"><div class="d-label">Jumlah Part</div><div class="d-val" style="color:var(--gold);font-weight:900;">${esc(partsVal)}</div></div>
     <div class="d-row"><div class="d-label">Genre</div><div class="d-val">${esc(g.genre)}</div></div>
     ${g.note ? '<div class="d-row"><div class="d-label">Note</div><div class="d-val" style="font-size:.68rem;">' + esc(g.note) + '</div></div>' : ''}
     <div class="d-row"><div class="d-label">Server Mirror</div><div class="d-val">${(g.folder_ids || []).length} server GDrive</div></div>
@@ -2025,8 +2097,23 @@ async function gRevokeOne(i) {
       game_ids: [r.game_id]
     });
 
-    toast(d.message || 'Akses berhasil dicabut!', 0);
-    gRevokeScan(); // Re-scan
+    if (d.status === 'ok') {
+      let detailHtml = '';
+      if (d.details && d.details.length) {
+        detailHtml = '<div style="margin-top:8px;padding:8px;background:var(--card);border-radius:8px;font-family:\'JetBrains Mono\';font-size:.65rem;line-height:1.5;color:var(--text);">' +
+          d.details.map(x => '• ' + esc(x)).join('<br>') + '</div>';
+      }
+      document.getElementById('gRevokeRes').innerHTML = `
+        <div style="background:rgba(0,230,118,0.1);border:1px solid var(--green);color:var(--green);padding:14px;border-radius:12px;margin-bottom:14px;font-size:.78rem;">
+          <b>✅ ${esc(d.message || 'Akses berhasil dicabut!')}</b>
+          ${detailHtml}
+        </div>
+      `;
+      toast(d.message || 'Akses berhasil dicabut!', 0);
+      setTimeout(() => gRevokeScan(), 2000);
+    } else {
+      toast(d.message || 'Gagal cabut akses', 1);
+    }
   } catch (err) {
     toast('Gagal cabut: ' + err.message, 1);
   }
@@ -2045,8 +2132,23 @@ async function gRevokeAll() {
       game_ids: ids
     });
 
-    toast(d.message || 'Semua akses dicabut!', 0);
-    gRevokeScan();
+    if (d.status === 'ok') {
+      let detailHtml = '';
+      if (d.details && d.details.length) {
+        detailHtml = '<div style="margin-top:8px;padding:8px;background:var(--card);border-radius:8px;font-family:\'JetBrains Mono\';font-size:.65rem;line-height:1.5;color:var(--text);">' +
+          d.details.map(x => '• ' + esc(x)).join('<br>') + '</div>';
+      }
+      document.getElementById('gRevokeRes').innerHTML = `
+        <div style="background:rgba(0,230,118,0.1);border:1px solid var(--green);color:var(--green);padding:14px;border-radius:12px;margin-bottom:14px;font-size:.78rem;">
+          <b>✅ ${esc(d.message || 'Semua akses berhasil dicabut!')}</b>
+          ${detailHtml}
+        </div>
+      `;
+      toast(d.message || 'Semua akses dicabut!', 0);
+      setTimeout(() => gRevokeScan(), 2500);
+    } else {
+      toast(d.message || 'Gagal cabut semua', 1);
+    }
   } catch (err) {
     toast('Gagal cabut semua: ' + err.message, 1);
   }
