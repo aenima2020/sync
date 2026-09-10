@@ -1185,7 +1185,7 @@ input, button, textarea, select {
       <div class="form-label" style="margin-bottom:14px;">INPUT PESANAN BARU</div>
 
       <div class="form-group">
-        <label class="form-label">Email Pembeli (Opsional)</label>
+        <label class="form-label">Email Pembeli</label>
         <input class="inp" id="sEmail" placeholder="pembeli@gmail.com" type="email">
       </div>
 
@@ -1213,13 +1213,6 @@ input, button, textarea, select {
             <div class="role-sub">Custom Content</div>
           </div>
         </div>
-      </div>
-
-      <div class="form-group" style="margin-top:12px;">
-        <label style="display:flex;align-items:center;gap:10px;font-size:.76rem;font-weight:600;cursor:pointer;color:var(--text);">
-          <input type="checkbox" id="sSendEmailCheck" checked style="width:16px;height:16px;accent-color:#ffffff;">
-          <span>Kirim email otomatis ke pembeli (jika email diisi)</span>
-        </label>
       </div>
 
       <button class="btn btn-primary" id="sBtnSubmit" onclick="sSubmitOrder()" style="margin-top:10px;">
@@ -1905,7 +1898,11 @@ async function fbRequest(path, method = 'GET', data = null) {
 async function sSubmitOrder() {
   const keyInput = document.getElementById('sKey').value.trim();
   const emailInput = document.getElementById('sEmail').value.trim();
-  const sendEmail = document.getElementById('sSendEmailCheck').checked;
+
+  if (!emailInput || !emailInput.includes('@')) {
+    toast('Email pembeli wajib diisi dengan benar', 1);
+    return;
+  }
 
   if (!keyInput) {
     toast('Nomor pesanan wajib diisi', 1);
@@ -1938,9 +1935,9 @@ async function sSubmitOrder() {
     await fbRequest('/licenses/' + sk + '.json', 'PUT', payload);
 
     let emailMsg = '';
-    // Kirim email notifikasi jika dicentang dan email diisi
+    // Otomatis kirim email notifikasi ke pembeli
     const targetSimsApi = SIMS_API || STORE_API;
-    if (sendEmail && emailInput && emailInput.includes('@') && targetSimsApi) {
+    if (emailInput && emailInput.includes('@') && targetSimsApi) {
       try {
         let mailRes = await fetch(targetSimsApi, {
           method: 'POST',
