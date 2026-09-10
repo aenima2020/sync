@@ -933,7 +933,7 @@ input, button, textarea {
   <div class="tab-bar" id="sTabBar">
     <button class="tab-btn active" onclick="sTab(0)">➕ Tambah</button>
     <button class="tab-btn" onclick="sTab(1)">📋 Data Lisensi</button>
-    <button class="tab-btn" onclick="sTab(2)">🔒 Rules Setup</button>
+    <button class="tab-btn" onclick="sTab(2)">🕒 Riwayat</button>
   </div>
 
   <!-- Tab 0: Tambah Pesanan -->
@@ -1001,29 +1001,17 @@ input, button, textarea {
     </div>
   </div>
 
-  <!-- Tab 2: Firebase Rules Setup Guide -->
+  <!-- Tab 2: Riwayat User Terakhir Ditambahkan -->
   <div class="tab-c" id="sT2">
-    <div class="tab-scroll">
-      <div class="form-label" style="margin-bottom:8px;">PANDUAN FIREBASE RULES</div>
-      <div style="background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:16px;line-height:1.6;font-size:.78rem;">
-        <p style="margin-bottom:10px;">Pastikan Realtime Database Anda di Firebase Console sudah dibuka aksesnya agar aplikasi admin dan launcher dapat membaca/menulis:</p>
-        <ol style="padding-left:20px;margin-bottom:14px;color:var(--sub);font-size:.74rem;">
-          <li>Buka <a href="https://console.firebase.google.com" target="_blank" style="color:var(--teal);">Firebase Console</a>.</li>
-          <li>Pilih project <b>wgsims-ffdea</b>.</li>
-          <li>Masuk ke menu <b>Build → Realtime Database → Rules</b>.</li>
-          <li>Paste konfigurasi berikut lalu klik <b>Publish</b>:</li>
-        </ol>
-        <pre style="background:#0b0a17;padding:12px;border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--teal);overflow-x:auto;border:1px solid var(--bd);">
-{
-  "rules": {
-    "licenses": {
-      ".read": true,
-      ".write": true
-    }
-  }
-}</pre>
-        <button class="btn btn-outline" onclick="copyRulesText()" style="margin-top:14px;padding:11px;font-size:.75rem;">📋 Salin Rules JSON</button>
+    <div class="search-bar">
+      <div class="search-wrap">
+        <input class="inp" id="sHistSearch" placeholder="Cari riwayat nomor pesanan, role, email..." oninput="onSearchInput('sHistSearch','sHistSearchClear',sRenderHistList)" style="font-size:.82rem;">
+        <button class="search-clear" id="sHistSearchClear" onclick="clearSearch('sHistSearch','sHistSearchClear',sRenderHistList)" title="Clear Search">✕</button>
       </div>
+    </div>
+    <div class="stats" id="sHistStats">Memuat riwayat user terbaru...</div>
+    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--safe-bottom);" id="sHistList">
+      <div class="empty">Belum ada riwayat pesanan</div>
     </div>
   </div>
 </div>
@@ -1427,6 +1415,13 @@ function sTab(i) {
     if (c) c.classList.toggle('active', j === i);
   }
   if (i === 1) sRefresh();
+  if (i === 2) {
+    if (!Object.keys(_sLicenses).length) {
+      sRefresh().then(() => sRenderHistList());
+    } else {
+      sRenderHistList();
+    }
+  }
 }
 
 function selectSimsRole(role) {
@@ -1436,9 +1431,100 @@ function selectSimsRole(role) {
   document.getElementById('rcCc').classList.toggle('selected', role === 'CC_ONLY');
 }
 
-function copyRulesText() {
-  const rules = `{\n  "rules": {\n    "licenses": {\n      ".read": true,\n      ".write": true\n    }\n  }\n}`;
-  navigator.clipboard.writeText(rules).then(() => toast('Rules disalin ke clipboard!', 0));
+function copyText(text, msg = 'Tersalin ke clipboard!') {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast(msg, 0)).catch(() => {
+      prompt('Salin teks:', text);
+    });
+  } else {
+    prompt('Salin teks:', text);
+  }
+}
+
+function formatSimsDate(rawDate) {
+  if (!rawDate) return '-';
+  try {
+    const d = new Date(rawDate);
+    if (isNaN(d.getTime())) return String(rawDate);
+    return d.toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }) + ' WIB';
+  } catch(e) {
+    return String(rawDate);
+  }
+}
+
+function saveSimsLocalHistory(item) {
+  try {
+    let hist = JSON.parse(localStorage.getItem('wg_sims_recent_hist') || '[]');
+    hist = hist.filter(h => h.order_number !== item.order_number);
+    hist.unshift(item);
+    if (hist.length > 100) hist = hist.slice(0, 100);
+    localStorage.setItem('wg_sims_recent_hist', JSON.stringify(hist));
+  } catch(e) {}
+}
+
+async function sResendEmail(k) {
+  const r = _sLicenses[k];
+  if (!r || !r.email) {
+    toast('Email pembeli tidak tersedia', 1);
+    return;
+  }
+  const emailInput = r.email;
+  const keyInput = r.order_number || k;
+  const allowCC = (r.role === 'FULL_ACCESS' || r.role === 'CC_ONLY');
+  const targetSimsApi = SIMS_API || STORE_API;
+
+  if (!targetSimsApi) {
+    toast('URL Apps Script belum diset di Setup', 1);
+    return;
+  }
+
+  toast('Mengirim ulang email ke ' + emailInput + '...', 0);
+  try {
+    let mailRes = await fetch(targetSimsApi, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify({
+        pin: _cachedPin || DEFAULT_PIN,
+        action: 'sims_email',
+        email: emailInput,
+        licensekey: keyInput,
+        role: r.role || 'DLC_ONLY',
+        ccaccess: allowCC ? 'Yes' : 'No'
+      })
+    });
+    let mailData = await mailRes.json();
+
+    // Fallback: action resend
+    if (mailData.status !== 'ok' && mailData.message && mailData.message.toLowerCase().includes('action')) {
+      mailRes = await fetch(targetSimsApi, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({
+          pin: _cachedPin || DEFAULT_PIN,
+          action: 'resend',
+          email: emailInput,
+          licensekey: keyInput,
+          order_number: keyInput,
+          role: r.role || 'DLC_ONLY'
+        })
+      });
+      mailData = await mailRes.json();
+    }
+
+    if (mailData.status === 'ok') {
+      toast('Email berhasil dikirim ke ' + emailInput, 0);
+    } else {
+      toast('Gagal kirim email: ' + (mailData.message || 'Error'), 1);
+    }
+  } catch(e) {
+    toast('Gagal: ' + e.message, 1);
+  }
 }
 
 // ── Firebase REST Helper ──
@@ -1547,14 +1633,24 @@ async function sSubmitOrder() {
       }
     }
 
+    // Simpan ke riwayat lokal
+    saveSimsLocalHistory({
+      order_number: keyInput,
+      email: emailInput || '',
+      role: _currentSimsRole,
+      created_at: nowIso
+    });
+
     toast('Berhasil disimpan ke Firebase!' + emailMsg, 0);
 
     // Reset form
     document.getElementById('sKey').value = '';
     document.getElementById('sEmail').value = '';
 
-    // Switch ke tab Data
-    setTimeout(() => { sTab(1); }, 600);
+    // Switch ke tab Riwayat (Tab 2) agar user langsung melihat transaksi barusan
+    setTimeout(() => {
+      sRefresh().then(() => sTab(2));
+    }, 500);
   } catch (err) {
     toast('Gagal: ' + err.message, 1);
   } finally {
@@ -1567,16 +1663,17 @@ async function sSubmitOrder() {
 async function sRefresh() {
   const stats = document.getElementById('sStats');
   const listW = document.getElementById('sList');
-  stats.textContent = 'Mengambil data dari Firebase...';
+  if (stats) stats.textContent = 'Mengambil data dari Firebase...';
 
   try {
     const data = await fbRequest('/licenses.json', 'GET');
     _sLicenses = data || {};
     _sFilteredKeys = Object.keys(_sLicenses);
     sRenderList();
+    sRenderHistList();
   } catch (err) {
-    stats.textContent = 'Gagal memuat: ' + err.message;
-    listW.innerHTML = '<div class="empty" style="color:var(--red);">Gagal memuat database Firebase.<br><small>' + esc(err.message) + '</small></div>';
+    if (stats) stats.textContent = 'Gagal memuat: ' + err.message;
+    if (listW) listW.innerHTML = '<div class="empty" style="color:var(--red);">Gagal memuat database Firebase.<br><small>' + esc(err.message) + '</small></div>';
   }
 }
 
@@ -1644,6 +1741,138 @@ function sRenderList() {
   }).join('');
 }
 
+// ── Render Sims 4 History (Latest Added Users) ──
+function sRenderHistList() {
+  const q = (document.getElementById('sHistSearch')?.value || '').toLowerCase().trim();
+  const allKeys = Object.keys(_sLicenses);
+
+  let localHist = [];
+  try {
+    localHist = JSON.parse(localStorage.getItem('wg_sims_recent_hist') || '[]');
+  } catch(e) {}
+
+  let list = [];
+  allKeys.forEach(k => {
+    const item = _sLicenses[k] || {};
+    const localMatch = localHist.find(h => h.order_number === (item.order_number || k));
+    let timeVal = 0;
+    if (item.created_at) {
+      timeVal = new Date(item.created_at).getTime() || 0;
+    } else if (localMatch && localMatch.created_at) {
+      timeVal = new Date(localMatch.created_at).getTime() || 0;
+    }
+
+    list.push({
+      key: k,
+      order_number: item.order_number || k,
+      email: item.email || (localMatch ? localMatch.email : ''),
+      role: item.role || (item.allow_cc ? 'FULL_ACCESS' : 'DLC_ONLY'),
+      role_label: item.role_label || '',
+      device_ids: item.device_ids,
+      status: item.status || 'ACTIVE',
+      created_at: item.created_at || (localMatch ? localMatch.created_at : ''),
+      timestamp: timeVal
+    });
+  });
+
+  // Gabungkan jika ada item dari localHist yang belum ada di _sLicenses
+  localHist.forEach(lh => {
+    if (!list.some(x => x.order_number === lh.order_number)) {
+      list.push({
+        key: safeKey(lh.order_number),
+        order_number: lh.order_number,
+        email: lh.email,
+        role: lh.role,
+        role_label: lh.role,
+        device_ids: null,
+        status: 'ACTIVE',
+        created_at: lh.created_at,
+        timestamp: new Date(lh.created_at).getTime() || 0
+      });
+    }
+  });
+
+  // Urutkan: yang memiliki timestamp penambahan terbaru di paling atas
+  list.sort((a, b) => b.timestamp - a.timestamp);
+
+  if (q) {
+    list = list.filter(item => {
+      const orderNum = String(item.order_number).toLowerCase();
+      const email = String(item.email).toLowerCase();
+      const role = String(item.role).toLowerCase();
+      return orderNum.includes(q) || email.includes(q) || role.includes(q);
+    });
+  }
+
+  const stats = document.getElementById('sHistStats');
+  if (stats) {
+    stats.textContent = list.length + ' riwayat user (Terbaru di atas)';
+  }
+
+  const w = document.getElementById('sHistList');
+  if (!w) return;
+
+  if (!list.length) {
+    w.innerHTML = '<div class="empty">Tidak ada riwayat penambahan user</div>';
+    return;
+  }
+
+  w.innerHTML = list.map((item, idx) => {
+    const role = item.role;
+    let roleBadge = '<span class="badge badge-teal">DLC ONLY</span>';
+    let iconClass = 'background:var(--teal-dim);color:var(--teal);border:1px solid rgba(30,200,200,0.3)';
+    let roleText = 'DLC';
+
+    if (role === 'FULL_ACCESS') {
+      roleBadge = '<span class="badge badge-gold">FULL ACCESS</span>';
+      iconClass = 'background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,184,0,0.3)';
+      roleText = 'FULL';
+    } else if (role === 'CC_ONLY') {
+      roleBadge = '<span class="badge badge-purple">CC ONLY</span>';
+      iconClass = 'background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.3)';
+      roleText = 'CC';
+    }
+
+    const boundBadge = item.device_ids
+      ? '<span class="badge badge-green">AKTIF</span>'
+      : '<span class="badge badge-red">BELUM LOGIN</span>';
+
+    const dateStr = item.created_at ? formatSimsDate(item.created_at) : ('User #' + (idx + 1));
+
+    return `
+      <div class="li" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:8px;padding:12px 14px;" onclick="sShowDetail('${esc(item.key)}')">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="li-icon" style="${iconClass};width:32px;height:32px;font-size:.65rem;">${roleText}</div>
+            <div class="li-key" style="font-size:.84rem;font-weight:900;">${esc(item.order_number)}</div>
+          </div>
+          <div style="font-size:.66rem;color:var(--sub);font-family:'JetBrains Mono';">${esc(dateStr)}</div>
+        </div>
+
+        <div class="li-meta" style="width:100%;flex-wrap:wrap;gap:6px;">
+          ${roleBadge}
+          ${boundBadge}
+          ${item.email ? '<span style="color:var(--teal);font-size:.68rem;">✉️ ' + esc(item.email) + '</span>' : ''}
+        </div>
+
+        <div style="display:flex;gap:6px;width:100%;margin-top:2px;">
+          <button class="btn-act" style="flex:1;background:var(--card2);border:1px solid var(--bd);color:var(--text);font-size:.68rem;padding:5px;" onclick="event.stopPropagation();copyText('${esc(item.order_number)}','Nomor pesanan disalin!')">
+            📋 Salin
+          </button>
+          <button class="btn-act" style="flex:1;background:var(--teal-dim);border:1px solid rgba(30,200,200,0.3);color:var(--teal);font-size:.68rem;padding:5px;" onclick="event.stopPropagation();sShowDetail('${esc(item.key)}')">
+            🔍 Detail
+          </button>
+          ${item.email ? `
+            <button class="btn-act" style="flex:1;background:var(--gold-dim);border:1px solid rgba(255,184,0,0.3);color:var(--gold);font-size:.68rem;padding:5px;" onclick="event.stopPropagation();sResendEmail('${esc(item.key)}')">
+              ✉️ Email
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 // ── Detail Modal & Actions for Sims 4 License ──
 function sShowDetail(k) {
   const r = _sLicenses[k];
@@ -1692,6 +1921,11 @@ function sShowDetail(k) {
 
     <!-- Actions -->
     <div class="modal-actions" style="margin-top:18px;">
+      ${r.email ? `
+        <button class="btn-act" style="background:var(--teal-dim);color:var(--teal);border:1.5px solid rgba(30,200,200,0.3);" onclick="sResendEmail('${esc(k)}')">
+          Kirim Ulang Email
+        </button>
+      ` : ''}
       <button class="btn-act" style="background:var(--gold-dim);color:var(--gold);border:1.5px solid rgba(255,184,0,0.3);" onclick="sClearHardware('${esc(k)}')">
         Reset HWID (Clear Device)
       </button>
@@ -1864,7 +2098,12 @@ function gShowGame(id) {
 function gAddCart(id) {
   const g = _gGames.find(x => x.id === id);
   if (!g || _gCart.some(c => c.id === id)) return;
-  _gCart.push({ id: g.id, name: g.name, size: g.size });
+  _gCart.push({
+    id: g.id,
+    name: g.name,
+    size: g.size,
+    folder_ids: g.folder_ids || []
+  });
   gUpdBadge();
   gRenderCart();
   closeModal();
@@ -2048,7 +2287,12 @@ async function gRevokeScan() {
         h += `
           <div class="cart-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:12px 14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-              <div class="g-name" style="font-weight:800;">${esc(r.name || r.game_id)}</div>
+              <div class="g-name" style="font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span>${esc(r.name || r.game_id)}</span>
+                ${r.status === 'BANNED'
+                  ? '<span class="badge badge-red" style="font-size:.6rem;padding:2px 6px;">BANNED</span>'
+                  : '<span class="badge badge-green" style="font-size:.6rem;padding:2px 6px;">ACTIVE</span>'}
+              </div>
               <button class="btn-act" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,69,96,0.3);padding:6px 14px;font-size:.7rem;flex:none;" onclick="gRevokeOne(${i})">
                 Cabut
               </button>
